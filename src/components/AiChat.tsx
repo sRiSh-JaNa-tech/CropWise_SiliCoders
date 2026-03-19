@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Bot, User, Loader2, MessageSquare, Mic, Square, Volume2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 
 interface Message {
@@ -17,6 +18,7 @@ const AiChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const navigate = useNavigate();
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -78,13 +80,22 @@ const AiChat: React.FC = () => {
     if (user?.aadhaarCard) formData.append('aadhaar', user.aadhaarCard);
 
     try {
-      const response = await fetch('http://localhost:9000/audio-chat', {
+      const response = await fetch('/api/ai/audio-chat', {
         method: 'POST',
         body: formData
       });
       if (!response.ok) throw new Error('AI Service Offline');
-      const data = await response.json();
       
+      const data = await response.json();
+
+      if (data.redirect) {
+        if (data.redirect.startsWith('/')) {
+          navigate(data.redirect);
+        } else if (data.redirect.startsWith('http')) {
+          window.open(data.redirect, '_blank');
+        }
+      }
+
       setMessages(prev => [
         ...prev, 
         { id: Date.now(), text: data.user_text, sender: 'user' },
@@ -114,18 +125,24 @@ const AiChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('query', input);
-      if (user?.aadhaarCard) formData.append('aadhaar', user.aadhaarCard);
-
-      const response = await fetch('http://localhost:9000/chat', {
+      const response = await fetch('/api/ai/chat', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: input, aadhaar: user?.aadhaarCard || null }),
       });
 
       if (!response.ok) throw new Error('AI Service Offline');
       
       const data = await response.json();
+
+      if (data.redirect) {
+        if (data.redirect.startsWith('/')) {
+          navigate(data.redirect);
+        } else if (data.redirect.startsWith('http')) {
+          window.open(data.redirect, '_blank');
+        }
+      }
+
       const aiMessage: Message = { 
         id: Date.now() + 1, 
         text: data.response, 
@@ -134,10 +151,14 @@ const AiChat: React.FC = () => {
       };
       setMessages(prev => [...prev, aiMessage]);
       speak(data.response);
-    } catch (err) {
+    } catch (err: any) {
+      let errorMsg = "I'm having trouble connecting right now. Please ensure the AI server is running.";
+      if (err?.message?.includes('429') || err?.message?.includes('rate limit')) {
+        errorMsg = "The AI model is temporarily rate-limited (free tier quota). Please wait a minute and try again.";
+      }
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
-        text: "I'm having trouble connecting to my brain right now.", 
+        text: errorMsg, 
         sender: 'ai' 
       }]);
     } finally {
