@@ -22,6 +22,10 @@ const ChatState = Annotation.Root({
     image_data: Annotation<string | null>,
     location: Annotation<{ lat: number; lon: number } | null>,
     dialect: Annotation<string>,
+
+    // Planner Integration
+    planner_input: Annotation<any>,
+    planner_output: Annotation<any>,
 });
 
 // --- Router: detects 'browse' intent with keyword pre-check ---
@@ -49,16 +53,17 @@ async function routerNode(state: typeof ChatState.State) {
 
     // Otherwise, ask LLM for classification
     const prompt = `Categorize this message into ONE word:
-- 'scheme': Questions about government schemes that can be answered from a database.
+- 'scheme': Questions about government schemes.
 - 'market': Questions about Mandi prices or selling crops.
 - 'profile': Questions about registration, documents, or Aadhaar.
+- 'planner': Questions about farming schedules, what to do next, or planning.
 - 'general': Anything else.
 
 Message: "${state.query}"
 Category:`;
     const res = await llm.invoke(prompt);
     const raw = (typeof res.content === 'string' ? res.content : '').trim().toLowerCase();
-    const category = ['scheme', 'market', 'profile'].find(c => raw.includes(c)) || 'general';
+    const category = ['scheme', 'market', 'profile', 'planner'].find(c => raw.includes(c)) || 'general';
     console.log(`  Router: "${state.query}" → ${category} (LLM)`);
     return { category };
 }
@@ -112,6 +117,43 @@ async function profileExpert(state: typeof ChatState.State) {
 async function generalExpert(state: typeof ChatState.State) {
     const res = await llm.invoke(state.query);
     return { response: typeof res.content === 'string' ? res.content : '' };
+}
+
+async function plannerExpert(state: typeof ChatState.State) {
+    console.log(`  📅 Planner Expert generating schedule...`);
+    const input = state.planner_input || {};
+    const prompt = `You are the CropWise Planner. Generate a detailed farming schedule for ${input.cropType || 'crops'} 
+Soil: ${input.soilType || 'standard'}, Farm Size: ${input.farmSize || '1 acre'}, Sowing Date: ${input.sowingDate || 'today'}.
+Provide 5 key tasks with dates, priority, and specific tips.
+Format rules:
+1. Be precise with dates.
+2. Focus on maximizing yield.
+3. Use a helpful tone for an Indian farmer.`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : 'Plan generated.' };
+}
+
+async function mandiExpert(state: typeof ChatState.State) {
+    console.log(`  📊 Mandi Expert analyzing prices...`);
+    // Mock mandi data for GHZ area
+    const mandiContext = "Wheat: ₹2,275/quintal, Rice: ₹2,183/quintal, Potato: ₹1,540/quintal. Trend: Market peaking for Wheat.";
+    const prompt = `Based on these Mandi prices: "${mandiContext}", answer the user's market question: "${state.query}".
+Provide expert advice on when to sell or which seeds to buy for the next season.`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : 'Mandi analysis complete.' };
+}
+
+async function weatherExpert(state: typeof ChatState.State) {
+    console.log(`  ☁️ Weather Expert checking conditions...`);
+    // Mocking weather data integration
+    const weatherInfo = "Current Temp: 28°C, Humidity: 65%, Forecast: Light rain expected in 2 days.";
+    const prompt = `Based on this weather: "${weatherInfo}", adjust the agricultural advice for the user's query: "${state.query}".
+Original Advice: ${state.response || 'None'}`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : state.response };
 }
 
 // --- Master Agent Nodes ---
@@ -306,8 +348,9 @@ function routeDirection(state: typeof ChatState.State): string {
     if (state.category === 'vision') return 'vision_expert';
     if (state.category === 'browse') return 'browse_expert';
     if (state.category === 'scheme') return 'scheme_expert';
-    if (state.category === 'market') return 'market_expert';
+    if (state.category === 'market') return 'mandi_expert';
     if (state.category === 'profile') return 'profile_expert';
+    if (state.category === 'planner') return 'planner_expert';
     return 'general_expert';
 }
 
@@ -316,22 +359,26 @@ const workflow = new StateGraph(ChatState)
     .addNode('router', routerNode)
     .addNode('fetcher', fetchDataNode)
     .addNode('scheme_expert', schemeExpert)
-    .addNode('market_expert', marketExpert)
+    .addNode('mandi_expert', mandiExpert)
     .addNode('profile_expert', profileExpert)
     .addNode('general_expert', generalExpert)
     .addNode('browse_expert', browseExpert)
     .addNode('vision_expert', visionExpert)
+    .addNode('planner_expert', plannerExpert)
+    .addNode('weather_expert', weatherExpert)
     .addNode('geospatial', geospatialNode)
     .addNode('dialect_guardrail', dialectNode)
     .addEdge('__start__', 'router')
     .addEdge('router', 'fetcher')
     .addConditionalEdges('fetcher', routeDirection)
     .addEdge('scheme_expert', 'geospatial')
-    .addEdge('market_expert', 'geospatial')
+    .addEdge('mandi_expert', 'geospatial')
     .addEdge('profile_expert', 'geospatial')
     .addEdge('general_expert', 'geospatial')
     .addEdge('vision_expert', 'geospatial')
-    .addEdge('browse_expert', '__end__') // Browse skips geospatial/dialect to preserve UI markdown
+    .addEdge('planner_expert', 'weather_expert')
+    .addEdge('weather_expert', 'geospatial')
+    .addEdge('browse_expert', '__end__') 
     .addEdge('geospatial', 'dialect_guardrail')
     .addEdge('dialect_guardrail', '__end__');
 
