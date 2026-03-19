@@ -4,6 +4,16 @@ interface User {
   name: string;
   aadhaarCard: string;
   missingDocs: string[];
+  enrolledSchemes: string[];
+  panCard?: string;
+  voterId?: string;
+  rationCard?: string;
+  kisanCreditCard?: string;
+  bankPassbook?: string;
+  landRecords?: string;
+  landSizeAcres?: number;
+  state?: string;
+  district?: string;
 }
 
 interface AuthContextType {

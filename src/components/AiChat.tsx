@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, Bot, User, Loader2, MessageSquare, Mic, Square, Volume2 } from 'lucide-react';
+import { Send, X, Bot, User, Loader2, MessageSquare, Mic, Square, Volume2, Image as ImageIcon, Wifi, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 
@@ -18,7 +18,22 @@ const AiChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [connectivity, setConnectivity] = useState<'high'|'low'|'zero'>('high');
+  const [dialect, setDialect] = useState('English');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  // Fake exact location for UP/Ghaziabad based on requirement
+  const locationContext = JSON.stringify({ lat: 28.6692, lon: 77.4538 }); 
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => setSelectedImage(event.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -78,6 +93,9 @@ const AiChat: React.FC = () => {
     const formData = new FormData();
     formData.append('audio', blob, 'recording.wav');
     if (user?.aadhaarCard) formData.append('aadhaar', user.aadhaarCard);
+    formData.append('connectivity', connectivity);
+    formData.append('dialect', dialect);
+    formData.append('location', locationContext);
 
     try {
       const response = await fetch('/api/ai/audio-chat', {
@@ -128,8 +146,16 @@ const AiChat: React.FC = () => {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: input, aadhaar: user?.aadhaarCard || null }),
+        body: JSON.stringify({ 
+          query: input, 
+          aadhaar: user?.aadhaarCard || null,
+          connectivity,
+          dialect,
+          location: { lat: 28.6692, lon: 77.4538 },
+          image_data: selectedImage
+        }),
       });
+      setSelectedImage(null);
 
       if (!response.ok) throw new Error('AI Service Offline');
       
@@ -178,16 +204,48 @@ const AiChat: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-80 sm:w-96 h-[500px] bg-[#0a0f1a]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-fade-in-up">
-          <div className="p-4 border-b border-white/10 bg-primary/10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Bot className="w-6 h-6 text-primary" />
+        <div className="absolute bottom-20 right-0 w-80 sm:w-[400px] h-[580px] bg-[#0a0f1a]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-fade-in-up">
+          <div className="p-4 border-b border-white/10 bg-primary/10 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Bot className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-white font-bold text-sm">CropWise Master Agent</h3>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] text-gray-400 font-medium">ONLINE</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-white font-bold text-sm">CropWise Free AI</h3>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[10px] text-gray-400 font-medium">AUDIO READY</span>
+            {/* Master Agent Telemetry Controls */}
+            <div className="flex gap-2 text-xs bg-black/40 p-2 rounded-lg border border-white/5">
+              <div className="flex-1 flex items-center gap-1.5 min-w-0">
+                {connectivity === 'high' ? <Wifi className="w-3.5 h-3.5 text-green-400" /> : connectivity === 'low' ? <Wifi className="w-3.5 h-3.5 text-yellow-400 opacity-80" /> : <Wifi className="w-3.5 h-3.5 text-red-500 opacity-40" />}
+                <select 
+                  value={connectivity} 
+                  onChange={(e) => setConnectivity(e.target.value as any)}
+                  className="bg-transparent text-gray-300 outline-none w-full cursor-pointer appearance-none truncate"
+                  title="Network Simulator"
+                >
+                  <option className="bg-dark" value="high">High Signal (RAG+Vision)</option>
+                  <option className="bg-dark" value="low">Low Signal (Brief)</option>
+                  <option className="bg-dark" value="zero">Zero Signal (SMS Mode)</option>
+                </select>
+              </div>
+              <div className="w-px bg-white/10" />
+              <div className="flex-1 flex items-center gap-1.5 min-w-0">
+                <Globe className="w-3.5 h-3.5 text-primary" />
+                <select
+                  value={dialect}
+                  onChange={(e) => setDialect(e.target.value)}
+                  className="bg-transparent text-gray-300 outline-none w-full cursor-pointer appearance-none truncate"
+                  title="Local Dialect"
+                >
+                  <option className="bg-dark" value="English">English</option>
+                  <option className="bg-dark" value="Khariboli">Khariboli (West UP)</option>
+                  <option className="bg-dark" value="Braj">Braj Bhasha</option>
+                </select>
               </div>
             </div>
           </div>
@@ -244,8 +302,24 @@ const AiChat: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-black/20">
+          <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-black/20 flex flex-col gap-2">
+            {selectedImage && (
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
+                <img src={selectedImage} alt="Upload preview" className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedImage(null)} 
+                  className="absolute top-1 right-1 bg-black/50 p-0.5 rounded-full hover:bg-red-500/80 transition-colors"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            )}
             <div className="flex gap-2">
+              <label className="cursor-pointer p-2.5 rounded-xl transition-all shadow-lg active:scale-95 bg-white/5 text-primary hover:bg-white/10 flex items-center justify-center">
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <ImageIcon className="w-5 h-5" />
+              </label>
               <button
                 type="button"
                 onClick={isRecording ? stopRecording : startRecording}
@@ -260,12 +334,12 @@ const AiChat: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={isRecording ? "Listening..." : "Ask anything..."}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary placeholder:text-gray-600 transition-all"
+                className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary placeholder:text-gray-600 transition-all"
                 disabled={isRecording}
               />
               <button 
                 type="submit" 
-                disabled={isLoading || isRecording || !input.trim()}
+                disabled={isLoading || isRecording || (!input.trim() && !selectedImage)}
                 className="bg-primary hover:bg-primary-light disabled:opacity-50 text-white p-2.5 rounded-xl transition-all shadow-lg active:scale-95"
               >
                 <Send className="w-5 h-5" />

@@ -188,32 +188,16 @@ export default function TanyaWeather() {
         className={`max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 transition-all duration-1000 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
       >
-        {/* Static Map Placeholder (User Preferred Aesthetics) */}
+        {/* Interactive Windy Weather Map */}
         <div className="relative rounded-2xl overflow-hidden bg-[#122F27] border border-[#1FAF5A]/10 min-h-[380px]">
-          {/* Subtle Grid Overlay */}
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: 'linear-gradient(#1FAF5A 1px, transparent 1px), linear-gradient(90deg, #1FAF5A 1px, transparent 1px)',
-              backgroundSize: '40px 40px'
-            }}
+          <iframe
+            title="Windy Weather Map"
+            width="100%"
+            height="100%"
+            src={`https://embed.windy.com/embed2.html?lat=${userCoords.lat}&lon=${userCoords.lon}&zoom=7&level=surface&overlay=rain&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`}
+            frameBorder="0"
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
           />
-          
-          <div className="absolute inset-0 bg-[#0B1F1A]/50 flex flex-col items-center justify-center p-6 text-center">
-             <div className="w-16 h-16 rounded-full bg-[#1FAF5A]/10 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(31,175,90,0.2)] relative z-10">
-                <MapPin className="w-8 h-8 text-[#1FAF5A]" />
-             </div>
-             <h3 className="text-2xl font-bold text-white mb-2 relative z-10">{t('yourLocation')}</h3>
-             <p className="text-gray-400 font-medium tracking-wide relative z-10">{locationName}</p>
-
-             {/* Decorative nodes */}
-             <div className="absolute top-8 right-8 text-[#F4C430]/20 pointer-events-none">
-               <Sun className="w-8 h-8" />
-             </div>
-             <div className="absolute bottom-8 left-8 text-[#5BB8F5]/20 pointer-events-none">
-               <Cloud className="w-8 h-8" />
-             </div>
-          </div>
         </div>
 
         {/* Weather Stats Cards */}

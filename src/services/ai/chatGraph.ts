@@ -1,5 +1,5 @@
 import { StateGraph, END, Annotation } from '@langchain/langgraph';
-import { llm } from './llm.js';
+import { llm, visionLlm } from './llm.js';
 import { schemeChain, profileChain, marketChain } from './chains.js';
 import PMScheme from '../../model/PMSchemes.js';
 import User from '../../model/User.js';
@@ -16,6 +16,12 @@ const ChatState = Annotation.Root({
     response: Annotation<string>,
     category: Annotation<string>,
     redirect: Annotation<string | null>,
+    
+    // Master Agent Telemetry
+    connectivity: Annotation<'high' | 'low' | 'zero'>,
+    image_data: Annotation<string | null>,
+    location: Annotation<{ lat: number; lon: number } | null>,
+    dialect: Annotation<string>,
 });
 
 // --- Router: detects 'browse' intent with keyword pre-check ---
@@ -27,6 +33,11 @@ const BROWSE_KEYWORDS = [
 ];
 
 async function routerNode(state: typeof ChatState.State) {
+    if (state.image_data) {
+        console.log(`  Router: image detected → vision`);
+        return { category: 'vision' };
+    }
+
     const queryLower = state.query.toLowerCase();
 
     // Pre-check: if any browse keyword is present, force browse
@@ -101,6 +112,64 @@ async function profileExpert(state: typeof ChatState.State) {
 async function generalExpert(state: typeof ChatState.State) {
     const res = await llm.invoke(state.query);
     return { response: typeof res.content === 'string' ? res.content : '' };
+}
+
+// --- Master Agent Nodes ---
+async function visionExpert(state: typeof ChatState.State) {
+    console.log(`  👁️ Vision Expert analyzing image...`);
+    const prompt = `Analyze this crop image for pests, fungal infections, or nutrient deficiencies. Prescribe actionable advice. Do not just "identify"; you must prescribe.
+User Query: ${state.query}`;
+    
+    const res = await visionLlm.invoke([
+        {
+            role: "user",
+            content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: state.image_data } }
+            ]
+        }
+    ]);
+    return { response: typeof res.content === 'string' ? res.content : 'Image analyzed.' };
+}
+
+async function geospatialNode(state: typeof ChatState.State) {
+    if (!state.location) return { response: state.response };
+    console.log(`  🌐 Geospatial Node adjusting for Lat: ${state.location.lat}, Lon: ${state.location.lon}`);
+    const prompt = `Adjust the following advice based on the farmer's GPS coordinates (Lat: ${state.location.lat}, Lon: ${state.location.lon}). Incorporate regional Mandi trends or weather context if relevant.
+Original Advice: ${state.response}`;
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : state.response };
+}
+
+async function dialectNode(state: typeof ChatState.State) {
+    const signal = state.connectivity || 'high';
+    
+    if (signal === 'zero') {
+        console.log(`  📶 Dialect/Guardrail (Zero Signal) → SMS Path C`);
+        const prompt = `Rewrite the following advice strictly under 140 characters for SMS transmission. If receiving a hex-code or short query, just give the immediate action.
+Advice: ${state.response}`;
+        const res = await llm.invoke(prompt);
+        return { response: typeof res.content === 'string' ? res.content : state.response.slice(0, 140) };
+    } 
+    
+    if (signal === 'low') {
+        console.log(`  📶 Dialect/Guardrail (Low Signal) → Brief Path B`);
+        const prompt = `Rewrite the following advice prioritizing brevity. Strip all non-essential metadata. Focus on immediate, actionable "First-Aid" for crops. Use bullet points.
+Advice: ${state.response}`;
+        const res = await llm.invoke(prompt);
+        return { response: typeof res.content === 'string' ? res.content : state.response };
+    }
+    
+    // High Signal (Path A)
+    if (!state.dialect || state.dialect.toLowerCase() === 'english') {
+        return { response: state.response };
+    }
+    
+    console.log(`  🗣️ Dialect/Guardrail (High Signal) → ${state.dialect}`);
+    const prompt = `Rewrite the following agricultural advice in the "${state.dialect}" dialect (e.g., Khariboli or Braj). Use a supportive, elder-brotherly tone. Make it Voice-First and Speech-Ready (simple sentences, avoid complex tables, use natural phrasing for Text-to-Speech). Preserve any Markdown links if present.
+Advice: ${state.response}`;
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : state.response };
 }
 
 // --- Browse Expert: Offline-first local navigator ---
@@ -234,6 +303,7 @@ async function browseExpert(state: typeof ChatState.State) {
 
 // --- Routing ---
 function routeDirection(state: typeof ChatState.State): string {
+    if (state.category === 'vision') return 'vision_expert';
     if (state.category === 'browse') return 'browse_expert';
     if (state.category === 'scheme') return 'scheme_expert';
     if (state.category === 'market') return 'market_expert';
@@ -250,13 +320,19 @@ const workflow = new StateGraph(ChatState)
     .addNode('profile_expert', profileExpert)
     .addNode('general_expert', generalExpert)
     .addNode('browse_expert', browseExpert)
+    .addNode('vision_expert', visionExpert)
+    .addNode('geospatial', geospatialNode)
+    .addNode('dialect_guardrail', dialectNode)
     .addEdge('__start__', 'router')
     .addEdge('router', 'fetcher')
     .addConditionalEdges('fetcher', routeDirection)
-    .addEdge('scheme_expert', '__end__')
-    .addEdge('market_expert', '__end__')
-    .addEdge('profile_expert', '__end__')
-    .addEdge('general_expert', '__end__')
-    .addEdge('browse_expert', '__end__');
+    .addEdge('scheme_expert', 'geospatial')
+    .addEdge('market_expert', 'geospatial')
+    .addEdge('profile_expert', 'geospatial')
+    .addEdge('general_expert', 'geospatial')
+    .addEdge('vision_expert', 'geospatial')
+    .addEdge('browse_expert', '__end__') // Browse skips geospatial/dialect to preserve UI markdown
+    .addEdge('geospatial', 'dialect_guardrail')
+    .addEdge('dialect_guardrail', '__end__');
 
 export const chatGraph = workflow.compile();

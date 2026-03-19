@@ -7,3 +7,9 @@ export const llm = new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
     temperature: 0.2,
 });
+
+export const visionLlm = new ChatGroq({
+    model: 'llama-3.2-11b-vision-preview',
+    apiKey: process.env.GROQ_API_KEY,
+    temperature: 0.2,
+});
