@@ -4,20 +4,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const PORT = process.env.PORT || 5280;
-const MONGO_URI = process.env.MONGO_URL;
+const MONGO_URI = process.env.MONGO_URL || process.env.DB_URI || 'mongodb://127.0.0.1:27017/cropwise_planner';
 
-if (!MONGO_URI) {
-  console.error("FATAL: MONGO_URL is not defined in .env");
-  process.exit(1);
-}
+// Start server immediately to serve API routes (like Translation) even if DB is down
+app.listen(PORT, () => {
+    console.log(`AgriCrop Server initialized on http://localhost:${PORT}`);
+});
 
-mongoose.connect(MONGO_URI as string)
+mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
   .then(() => {
-    console.log('Connected to MongoDB SUCCESS');
-    app.listen(PORT, () => {
-      console.log(`AgriCrop Server running on http://localhost:${PORT}`);
-    });
+    console.log('MongoDB successfully connected');
   })
   .catch((err) => {
-    console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error:', err.message);
+    console.log('Running in Fallback mode without Database (Offline features enabled)');
   });

@@ -12,6 +12,9 @@ import tanyaWeatherRoutes from './tanya-dashboard/api/weatherRoutes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import plannerRoutes from './routes/plannerRoutes.js';
+import translationRoutes from './routes/translationRoutes.js';
+
 dotenv.config();
 
 const app = express();
@@ -40,6 +43,8 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 // ─── Tanya Dashboard Weather API ───
 app.use('/api/tanya', tanyaWeatherRoutes);
+app.use('/api/planner', plannerRoutes);
+app.use('/api', translationRoutes);
 
 // Serve frontend in production
 const distPath = path.join(__dirname, '../dist');

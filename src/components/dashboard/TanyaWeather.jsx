@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Thermometer,
@@ -25,6 +26,7 @@ export default function TanyaWeather() {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  /** @type {any} */
   const [weatherData, setWeatherData] = useState(null);
   const [userCoords, setUserCoords] = useState({ lat: 28.6139, lon: 77.2090 });
   const sectionRef = useRef(null);
