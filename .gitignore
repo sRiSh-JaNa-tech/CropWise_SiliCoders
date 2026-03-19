@@ -1,4 +1,4 @@
 node_modules/
 .env
 dist/
-venv_py/
+venv_py/.DS_Store
