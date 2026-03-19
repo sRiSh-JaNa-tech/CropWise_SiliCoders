@@ -7,7 +7,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType>({
   currentLanguage: 'en',
-  setLanguage: () => {},
+  setLanguage: () => { },
 });
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -27,9 +27,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Pre-trigger on load
           setTimeout(() => handleSetLanguage(cachedLang as string), 1500);
       } else if (supported.includes(browserLang)) {
-          setCurrentLanguage(browserLang);
+        setCurrentLanguage(browserLang);
       }
-    } catch(e) {}
+    } catch (e) { }
   }, []);
 
   const handleSetLanguage = (lang: string) => {

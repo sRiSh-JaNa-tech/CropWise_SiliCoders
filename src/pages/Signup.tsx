@@ -21,7 +21,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     if (!/^\d{6}$/.test(formData.sixDigitPin)) {
       setError('PIN must be exactly 6 digits.');
       setLoading(false);
@@ -54,7 +54,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#0a0f1a] relative overflow-hidden py-12">
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
-      
+
       <div className="w-full max-w-lg bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl z-10">
         <div className="text-center mb-8">
           <div className="inline-flex p-3 rounded-2xl bg-primary/10 mb-4">
@@ -72,7 +72,7 @@ const Signup = () => {
                 type="text"
                 placeholder="Enter full name"
                 className={inputClass}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
               <User className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -86,7 +86,7 @@ const Signup = () => {
                 type="email"
                 placeholder="name@example.com"
                 className={inputClass}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
               <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -100,7 +100,7 @@ const Signup = () => {
                 type="tel"
                 placeholder="+91 0000000000"
                 className={inputClass}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 required
               />
               <Phone className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -113,7 +113,7 @@ const Signup = () => {
               <input
                 type="date"
                 className={`${inputClass} !pr-4`}
-                onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                 required
               />
               <Calendar className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -127,7 +127,7 @@ const Signup = () => {
                 type="text"
                 placeholder="12 digit number"
                 className={inputClass}
-                onChange={(e) => setFormData({...formData, aadhaarCard: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, aadhaarCard: e.target.value })}
                 required
               />
               <ShieldCheck className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -142,7 +142,7 @@ const Signup = () => {
                 placeholder="Create a 6-digit PIN"
                 maxLength={6}
                 className={inputClass}
-                onChange={(e) => setFormData({...formData, sixDigitPin: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, sixDigitPin: e.target.value })}
                 required
               />
               <KeyRound className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
