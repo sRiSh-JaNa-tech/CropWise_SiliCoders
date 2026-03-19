@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "dev:server": "nodemon src/server.ts",
+    "dev:ui": "vite",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:ui\"",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +26,9 @@
     "localtunnel": "^1.8.3",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.1",
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "vite": "^6.2.0",
+    "vite-plugin-pwa": "^0.21.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -31,6 +37,9 @@
     "@types/node": "^25.2.3",
     "@types/ws": "^8.18.1",
     "concurrently": "^9.2.1",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19",
     "typescript": "^5.9.3"
   }
 }

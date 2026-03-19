@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AgriCrop - Modern Farming</title>
+    <meta name="description" content="Manage your crops with ease.">
+    <meta name="theme-color" content="#2e7d32">
+    <link rel="icon" type="image/svg+xml" href="/vite.svg">
+    <link rel="stylesheet" href="/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="logo">
+                <span class="icon-leaf">🌱</span>
+                <h1>AgriCrop</h1>
+            </div>
+            <nav class="nav">
+                <button id="install-pwa" class="btn-primary" style="display: none;">Install App</button>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section class="hero">
+                <div class="hero-content">
+                    <h2 class="badge">Innovation in Farming</h2>
+                    <h3>Smart Farming for a <span class="highlight">Sustainable</span> Future</h3>
+                    <p>Harness the power of real-time data to optimize your harvest and manage your resources efficiently.</p>
+                    <div class="cta-group">
+                        <button class="btn-main">Get Started</button>
+                        <button class="btn-secondary" id="check-health">Check Status</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="health-status" class="status-card" style="display: none;">
+                <div class="status-indicator"></div>
+                <p id="status-text">Server Status: Checking...</p>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 AgriCrop. Premium Agricultural Solutions.</p>
+        </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
