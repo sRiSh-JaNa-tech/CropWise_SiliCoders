@@ -36,11 +36,7 @@ const Navbar: React.FC = () => {
         </Link>
       </div>
       
-      <div className="hidden md:flex items-center space-x-6 text-sm font-medium">
-        <Link to="/" className="hover:text-primary transition-colors"><AutoTranslate text="Home" /></Link>
-        <Link to="/about" className="hover:text-primary transition-colors"><AutoTranslate text="About App" /></Link>
-        <Link to="/api" className="hover:text-primary transition-colors"><AutoTranslate text="Mandi API" /></Link>
-      </div>
+      
 
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Upstream Global Language Selector */}
