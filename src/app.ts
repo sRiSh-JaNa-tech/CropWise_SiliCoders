@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import schemeRoutes from './routes/schemeRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import mongoose from 'mongoose';
 import tanyaWeatherRoutes from './tanya-dashboard/api/weatherRoutes.js';
 
@@ -25,6 +26,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/schemes', schemeRoutes);
+app.use('/api/ai', aiRoutes);
 
 // ─── MongoDB Connection ───
 const MONGO_URL = process.env.MONGO_URL;
