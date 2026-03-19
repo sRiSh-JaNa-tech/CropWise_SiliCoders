@@ -14,7 +14,7 @@ load_dotenv()
 
 # Initialize Google Generative AI
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+gemini_model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
 
 app = FastAPI(title="AgriCrop AI Free Voice Agent API")
 
@@ -37,6 +37,8 @@ async def chat(query: str = Form(...), aadhaar: Optional[str] = Form(None)):
         final_state = await app_graph.ainvoke(inputs)
         return {"response": final_state["response"], "category": final_state["category"]}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/audio-chat")

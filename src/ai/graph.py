@@ -15,7 +15,7 @@ class AgentState(TypedDict):
     category: str # 'scheme', 'market', 'profile', 'general'
 
 # 2. Router Node: Identifies User Intent
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
+llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite-preview", google_api_key=os.getenv("GOOGLE_API_KEY"))
 
 async def router_node(state: AgentState):
     prompt = f"""
@@ -29,7 +29,11 @@ async def router_node(state: AgentState):
     Category:"""
     
     res = await llm.ainvoke(prompt)
-    category = res.content.strip().lower()
+    category_content = res.content
+    if isinstance(category_content, list):
+        category = "".join([p.get("text", "") for p in category_content if isinstance(p, dict) and p.get("type") == "text"]).strip().lower()
+    else:
+        category = category_content.strip().lower()
     return {"category": category}
 
 # 3. Knowledge Fetching Node
@@ -59,9 +63,19 @@ async def profile_expert(state: AgentState):
     return {"response": res}
 
 async def general_expert(state: AgentState):
-    res = await llm.ainvoke(state["query"])
-    return {"response": res.content}
-
+    prompt = f"""
+    You are the agricultural assistant for CropWise.
+    You MUST ONLY answer questions related to agriculture, farming, crops, soil, farmer schemes, or Mandy markets.
+    If the user asks about anything else (e.g., coding, general knowledge, sports, history, etc.), kindly decline by saying exactly:
+    "I am the CropWise Assistant. I can only answer questions related to agriculture, crop recommendations, farming schemes, and mandi markets."
+    
+    User Query: {state['query']}
+    """
+    res = await llm.ainvoke(prompt)
+    resp_content = res.content
+    if isinstance(resp_content, list):
+        resp_content = "".join([p.get("text", "") for p in resp_content if isinstance(p, dict) and p.get("type") == "text"])
+    return {"response": resp_content}
 # 5. Conditional Routing Logic
 def route_direction(state: AgentState):
     category = state["category"]
