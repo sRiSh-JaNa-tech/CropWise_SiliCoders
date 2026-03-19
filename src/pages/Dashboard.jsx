@@ -14,21 +14,11 @@ import TanyaFooter from '../components/dashboard/TanyaFooter';
  */
 export default function Dashboard() {
   return (
-    <LanguageProvider>
-      <div className="min-h-screen bg-[#0B1F1A] text-white font-outfit scroll-smooth">
-        {/* Sticky Navbar */}
-        <TanyaNavbar />
-
-        {/* Main Content */}
-        <main>
-          <TanyaHero />
-          <TanyaFeatures />
-          <TanyaWeather />
-        </main>
-
-        {/* Footer */}
-        <TanyaFooter />
-      </div>
-    </LanguageProvider>
+    <div className="bg-[#0B1F1A] text-white font-outfit scroll-smooth">
+      <TanyaHero />
+      <TanyaFeatures />
+      <TanyaWeather />
+      <TanyaFooter />
+    </div>
   );
 }
