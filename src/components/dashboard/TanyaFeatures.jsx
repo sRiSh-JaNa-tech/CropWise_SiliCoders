@@ -81,6 +81,7 @@ export default function TanyaFeatures() {
               onClick={() => {
                 if (feature.titleKey === 'pmKisanTitle') navigate('/pm-kisan');
                 else if (feature.titleKey === 'farmingPlannerTitle') navigate('/smart-planner');
+                else if (feature.titleKey === 'cropDoctorTitle') navigate('/crop-doctor');
               }}
               className={`group relative bg-[#122F27] rounded-2xl p-6 border border-[#1FAF5A]/10
                 hover:border-[#1FAF5A]/50 hover:shadow-lg hover:shadow-[#1FAF5A]/10

@@ -12,6 +12,7 @@ import { LanguageProvider as UpstreamLanguageProvider } from './context/Language
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider as TanyaLanguageProvider } from './components/dashboard/LanguageContext';
 import { SidebarProvider } from './context/SidebarContext';
+import CropDoctor from './pages/CropDoctor';
 
 // Lazy-load Tanya Dashboard (isolated module)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -51,6 +52,7 @@ function App() {
                       {/* Upstream Smart Planner routes */}
                       <Route path="/calendar" element={<SmartPlannerDashboard />} />
                       <Route path="/smart-planner" element={<SmartPlannerDashboard />} />
+                      <Route path="/crop-doctor" element={<CropDoctor />} />
                     </Routes>
                   </main>
                 </div>

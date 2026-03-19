@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Sprout, TrendingUp, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, FileText, Sprout, TrendingUp, CalendarDays, Stethoscope } from 'lucide-react';
 import { useSidebar } from '../context/SidebarContext';
 
 const Sidebar: React.FC = () => {
@@ -13,6 +13,7 @@ const Sidebar: React.FC = () => {
     { name: 'Crop Recommendation', path: '/crop-recommendation', icon: Sprout },
     { name: 'Smart Mandi Returns', path: '/smart-mandi', icon: TrendingUp },
     { name: 'Planning Calendar', path: '/calendar', icon: CalendarDays },
+    { name: 'Crop Doctor', path: '/crop-doctor', icon: Stethoscope },
   ];
 
   return (
