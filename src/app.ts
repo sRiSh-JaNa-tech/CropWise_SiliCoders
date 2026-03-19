@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import authRoutes from './routes/authRoutes.js';
 
 // Setup for ES Modules __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +15,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // API Endpoints
 app.get('/api/health', (req: Request, res: Response) => {
