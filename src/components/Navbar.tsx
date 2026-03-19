@@ -1,7 +1,12 @@
 import React from 'react';
-import { Menu, Leaf, User, LogOut, BellRing, AlertCircle } from 'lucide-react';
+import { Menu, Leaf, User, LogOut, BellRing, AlertCircle, Globe, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useLanguage } from './dashboard/LanguageContext';
+
+const LANGUAGES = [
+  'English', 'Hindi', 'Tamil', 'Telugu', 'Bengali', 'Marathi', 'Punjabi',
+];
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -10,6 +15,8 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
+  const [langOpen, setLangOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -40,6 +47,38 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* Language Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-sm text-gray-300 hover:text-white border border-white/10 hover:border-white/30 transition-all duration-300"
+          >
+            <Globe className="w-4 h-4 text-primary" />
+            <span className="hidden sm:inline">{language}</span>
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {langOpen && (
+            <div className="absolute right-0 mt-2 w-40 rounded-xl bg-gray-900 border border-white/10 shadow-2xl py-1 z-50 animate-in fade-in duration-200">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => {
+                    setLanguage(lang);
+                    setLangOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150 ${
+                    language === lang
+                      ? 'text-primary bg-primary/10'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {user ? (
           <>
             {/* Pulsing Reminder Icon */}

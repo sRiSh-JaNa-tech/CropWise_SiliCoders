@@ -7,58 +7,52 @@ import AiChat from './components/AiChat';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PMSchemes from './pages/PMSchemes';
+import { LanguageProvider } from './components/dashboard/LanguageContext';
 
 // Lazy-load Tanya Dashboard (isolated module)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 
-// Layout for older pages (with Global Navbar & Sidebar)
-function MainLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  return (
-    <>
-      <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex flex-1 pt-20">
-        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <main className="flex-1 transition-all duration-300 relative">
-          <Outlet /> {/* Renders child routes */}
-        </main>
-      </div>
-    </>
-  );
-}
-
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   return (
-    <Router>
-      <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white">
-        <Routes>
-          {/* Tanya Dashboard — Self-contained page as the ROOT landing page! */}
-          <Route
-            path="/"
-            element={
-              <Suspense fallback={<div className="flex items-center justify-center h-screen text-lg">Loading Dashboard...</div>}>
-                <Dashboard />
-              </Suspense>
-            }
-          />
+    <LanguageProvider>
+      <Router>
+        <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white overflow-x-hidden">
+          {/* Global Original Working Navbar */}
+          <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
           
-          {/* Old Pages wrapped in original Navbar/Sidebar layout */}
-          <Route element={<MainLayout />}>
-            <Route path="/old-home" element={<Hero />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/pm-kisan" element={<PMSchemes />} />
-            {/* Dummy routes for sidebar links */}
-            <Route path="/crop-recommendation" element={<div className="p-8"><h2 className="text-3xl font-bold">Crop Recommendation</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-            <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-            <Route path="/calendar" element={<div className="p-8"><h2 className="text-3xl font-bold">Planning Calendar</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-          </Route>
-        </Routes>
+          <div className="flex flex-1 pt-16">
+            <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <main className="flex-1 transition-all duration-300 relative w-full overflow-hidden">
+
+          <Routes>
+              {/* Tanya Dashboard — Now wrapped in the working global layout! */}
+              <Route
+                path="/"
+                element={
+                  <Suspense fallback={<div className="flex items-center justify-center p-20 text-lg">Loading Dashboard...</div>}>
+                    <Dashboard />
+                  </Suspense>
+                }
+              />
+              
+              <Route path="/old-home" element={<Hero />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/pm-kisan" element={<PMSchemes />} />
+              <Route path="/crop-recommendation" element={<div className="p-8"><h2 className="text-3xl font-bold">Crop Recommendation</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+              <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+              <Route path="/calendar" element={<div className="p-8"><h2 className="text-3xl font-bold">Planning Calendar</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+            </Routes>
+          </main>
+        </div>
 
         {/* Global AI Chatbot */}
         <AiChat />
       </div>
     </Router>
+    </LanguageProvider>
   );
 }
 
