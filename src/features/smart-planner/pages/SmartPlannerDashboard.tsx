@@ -3,13 +3,15 @@ import { usePlanner } from '../hooks/usePlanner';
 import { PlannerForm } from '../components/PlannerForm';
 import { CalendarView } from '../components/CalendarView';
 import { NotificationsPanel } from '../components/NotificationsPanel';
-import { WifiOff, Leaf } from 'lucide-react';
+import { WifiOff, Leaf, Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AutoTranslate } from '../components/AutoTranslate';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { useSidebar } from '../../../context/SidebarContext';
 
 export const SmartPlannerDashboard: React.FC = () => {
   const { generatePlan, events, loading, error } = usePlanner();
+  const { toggleSidebar } = useSidebar();
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-200 to-teal-800 font-sans pb-12">
@@ -17,8 +19,11 @@ export const SmartPlannerDashboard: React.FC = () => {
       <nav className="fixed top-0 w-full z-[60] bg-green-700/80 backdrop-blur-md px-4 py-3 flex items-center shadow-sm">
         {/* Left: Mobile Menu & Logo */}
         <div className="flex items-center gap-4">
-          <button className="bg-white/20 backdrop-blur-lg p-2 rounded-lg hover:bg-white/30 transition-colors">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <button 
+            onClick={toggleSidebar}
+            className="bg-white/20 backdrop-blur-lg p-2 rounded-lg hover:bg-white/30 transition-colors"
+          >
+            <Menu className="w-6 h-6 text-white" />
           </button>
           <Link to="/" className="flex items-center gap-2 group">
             <Leaf className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
@@ -48,13 +53,28 @@ export const SmartPlannerDashboard: React.FC = () => {
       <div className="h-16"></div>
 
       {/* Top White Strip with Shadow */}
-      <div className="bg-white shadow-lg py-6 px-6 mb-8 text-center border-b border-gray-200 w-full" id="google-translate-container">
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-          <AutoTranslate text="Smart Farming Planner" />
-        </h1>
-        <p className="text-green-700 mt-2 font-medium">
-          <AutoTranslate text="AI-generated weekly and monthly agricultural schedules" />
-        </p>
+      <div className="bg-white shadow-lg py-8 px-6 mb-8 text-center border-b border-gray-200 w-full relative">
+        {/* Aesthetic Leaves */}
+        <div className="flex items-center justify-center gap-6">
+          <div className="hidden sm:block">
+            <Leaf className="w-10 h-10 text-green-500/30 rotate-[-15deg] transition-all hover:text-green-500 hover:rotate-[-45deg] duration-500 cursor-default" />
+          </div>
+          
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight flex items-center gap-4">
+              <span className="sm:hidden"><Leaf className="w-6 h-6 text-green-500" /></span>
+              <AutoTranslate text="Smart Farming Planner" />
+              <span className="sm:hidden"><Leaf className="w-6 h-6 text-green-500 scale-x-[-1]" /></span>
+            </h1>
+            <p className="text-green-700 mt-2 font-semibold">
+              <AutoTranslate text="AI-generated weekly and monthly agricultural schedules" />
+            </p>
+          </div>
+
+          <div className="hidden sm:block">
+            <Leaf className="w-10 h-10 text-green-500/30 rotate-[15deg] scale-x-[-1] transition-all hover:text-green-500 hover:rotate-[45deg] duration-500 cursor-default" />
+          </div>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
