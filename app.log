@@ -1,0 +1,141 @@
+
+> filehelper@1.0.0 dev
+> concurrently "npm run dev:server" "npm run dev:ui" "npm run dev:ai"
+
+[1] 
+[1] > filehelper@1.0.0 dev:ui
+[1] > vite --port 5281
+[1] 
+[2] 
+[2] > filehelper@1.0.0 dev:ai
+[2] > venv_py/bin/python3 src/ai/server.py
+[2] 
+[0] 
+[0] > filehelper@1.0.0 dev:server
+[0] > nodemon --exec npx tsx src/server.ts
+[0] 
+[0] [33m[nodemon] 3.1.14[39m
+[0] [33m[nodemon] to restart at any time, enter `rs`[39m
+[0] [33m[nodemon] watching path(s): *.*[39m
+[0] [33m[nodemon] watching extensions: ts,json[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[1] Port 5281 is in use, trying another one...
+[1] 
+[1]   VITE v6.4.1  ready in 113 ms
+[1] 
+[1]   ➜  Local:   http://localhost:5282/
+[1]   ➜  Network: use --host to expose
+[2] /Users/upwansingh/Desktop/AI_ARENA/CropWise_SiliCoders/src/ai/server.py:7: FutureWarning: 
+[2] 
+[2] All support for the `google.generativeai` package has ended. It will no longer be receiving 
+[2] updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+[2] See README for more details:
+[2] 
+[2] https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+[2] 
+[2]   import google.generativeai as genai
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[2] Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[2] Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+[2] INFO:     Started server process [23265]
+[2] INFO:     Waiting for application startup.
+[2] INFO:     Application startup complete.
+[2] INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+[2] INFO:     127.0.0.1:61788 - "POST /chat HTTP/1.1" 200 OK
+[2] INFO:     127.0.0.1:61812 - "POST /chat HTTP/1.1" 200 OK
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[2] INFO:     127.0.0.1:61911 - "POST /chat HTTP/1.1" 200 OK
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[2] INFO:     127.0.0.1:62019 - "POST /chat HTTP/1.1" 200 OK
+[2] INFO:     127.0.0.1:62061 - "POST /chat HTTP/1.1" 200 OK
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+njecting env (8) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[1] 2:43:44 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[1] 2:44:21 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[1] 2:44:26 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[1] 2:44:26 AM [vite] (client) ✨ new dependencies optimized: react-markdown, remark-gfm
+[1] 2:44:26 AM [vite] (client) ✨ optimized dependencies changed. reloading
+[1] 2:44:37 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
+[1] 2:44:55 AM [vite] (client) page reload tailwind.config.js
+[1] 2:45:13 AM [vite] (client) page reload src/components/AiChat.tsx
+[1] 2:45:16 AM [vite] (client) page reload tailwind.config.js
+[1] 2:45:16 AM [vite] (client) page reload src/components/AiChat.tsx
+[1] 2:45:22 AM [vite] (client) page reload src/components/AiChat.tsx
+[1] 2:45:29 AM [vite] (client) page reload src/components/AiChat.tsx
+[1] 2:52:37 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[1] 2:52:49 AM [vite] (client) page reload src/components/CropRecommendationPage.tsx
+[0] [32m[nodemon] restarting due to changes...[39m
+[0] [32m[nodemon] starting `npx tsx src/server.ts`[39m
+[0] [dotenv@17.3.1] injecting env (8) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[0] [dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[0] MongoDB successfully connected
+[0] Express Backend initialized on port 5050
+[0] ✅ MongoDB connected successfully
