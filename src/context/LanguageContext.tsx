@@ -24,6 +24,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (cachedLang && supported.includes(cachedLang as string)) {
           setCurrentLanguage(cachedLang as string);
+          // Pre-trigger on load
+          setTimeout(() => handleSetLanguage(cachedLang as string), 1500);
       } else if (supported.includes(browserLang)) {
           setCurrentLanguage(browserLang);
       }
@@ -33,6 +35,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const handleSetLanguage = (lang: string) => {
       setCurrentLanguage(lang);
       localStorage.setItem('user_language_preference', lang);
+
+      // Trigger Full-Page Google Translate DOM
+      setTimeout(() => {
+        const selectField = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+        if (selectField) {
+          selectField.value = lang;
+          selectField.dispatchEvent(new Event('change'));
+        }
+      }, 100);
   }
 
   return (
