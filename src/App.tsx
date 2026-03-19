@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import AiChat from './components/AiChat';
 import CropRecommendationPage from './components/CropRecommendationPage';
+import SmartMandiReturnsPage from './components/SmartMandiReturnsPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PMSchemes from './pages/PMSchemes';
@@ -49,7 +50,7 @@ function App() {
                       <Route path="/account" element={<Account />} />
                       <Route path="/pm-kisan" element={<PMSchemes />} />
                       <Route path="/crop-recommendation" element={<CropRecommendationPage />} />
-                      <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+                      <Route path="/smart-mandi" element={<SmartMandiReturnsPage />} />
                       
                       {/* Upstream Smart Planner routes */}
                       <Route path="/calendar" element={<SmartPlannerDashboard />} />
