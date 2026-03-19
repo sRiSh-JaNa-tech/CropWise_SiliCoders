@@ -1,12 +1,15 @@
 import mongoose from 'mongoose';
-import PMScheme from '../model/PMSchemes'; // Ensure this path points to your compiled model
+import PMScheme from '../model/PMSchemes.js'; 
 import dotenv from 'dotenv'
 
 dotenv.config();
 
+const MONGO_URI = process.env.MONGO_URL; 
 
-// Replace with your actual MongoDB connection string
-const MONGO_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/taskdb'; 
+if (!MONGO_URI) {
+  console.error("ERROR: MONGO_URL is not defined in .env");
+  process.exit(1);
+}
 
 const schemesData = [
   {

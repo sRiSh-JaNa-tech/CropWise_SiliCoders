@@ -9,7 +9,8 @@
     "dev:ui": "vite",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:ui\"",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "tsx src/assets/fillDatabase.ts"
   },
   "keywords": [],
   "author": "",

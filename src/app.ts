@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
+import schemeRoutes from './routes/schemeRoutes.js';
 
 // Setup for ES Modules __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/schemes', schemeRoutes);
 
 // API Endpoints
 app.get('/api/health', (req: Request, res: Response) => {
