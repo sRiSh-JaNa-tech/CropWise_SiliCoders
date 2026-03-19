@@ -105,24 +105,25 @@ async function generalExpert(state: typeof ChatState.State) {
 
 // --- Browse Expert: Offline-first local navigator ---
 // Internal sitemap of the CropWise application — NO LLM NEEDED for matching
-const APP_BASE = 'http://127.0.0.1:5178';
+const APP_BASE = 'http://127.0.0.1:5281';
 const APP_SITEMAP: Record<string, { path: string; description: string }> = {
-    'home':               { path: '/',                    description: 'Homepage with hero section and features overview' },
-    'pm schemes':         { path: '/pm-kisan',            description: 'PM Kisan and other government schemes for farmers' },
-    'schemes':            { path: '/pm-kisan',            description: 'Government schemes, benefits, eligibility' },
-    'pm kisan':           { path: '/pm-kisan',            description: 'PM Kisan Yojana scheme details' },
-    'kisan':              { path: '/pm-kisan',            description: 'PM Kisan Yojana' },
-    'login':              { path: '/login',               description: 'User login page' },
-    'signup':             { path: '/signup',              description: 'User registration page' },
-    'register':           { path: '/signup',              description: 'New user registration' },
-    'dashboard':          { path: '/dashboard',           description: 'User dashboard with analytics and data' },
-    'crop recommendation':{ path: '/crop-recommendation', description: 'AI-powered crop recommendations' },
-    'crop':               { path: '/crop-recommendation', description: 'Crop recommendations' },
-    'smart mandi':        { path: '/smart-mandi',         description: 'Smart Mandi market prices' },
-    'mandi':              { path: '/smart-mandi',         description: 'Market prices and crop selling info' },
-    'market':             { path: '/smart-mandi',         description: 'Market prices' },
-    'calendar':           { path: '/calendar',            description: 'Farming planning calendar' },
-    'plan':               { path: '/calendar',            description: 'Planning calendar' },
+    'home': { path: '/', description: 'Main dashboard and landing page' },
+    'old home': { path: '/old-home', description: 'Original hero section' },
+    'pm schemes': { path: '/pm-kisan', description: 'PM Kisan and other government schemes for farmers' },
+    'schemes': { path: '/pm-kisan', description: 'Government schemes, benefits, eligibility' },
+    'pm kisan': { path: '/pm-kisan', description: 'PM Kisan Yojana scheme details' },
+    'kisan': { path: '/pm-kisan', description: 'PM Kisan Yojana' },
+    'login': { path: '/login', description: 'User login page' },
+    'signup': { path: '/signup', description: 'User registration page' },
+    'register': { path: '/signup', description: 'New user registration' },
+    'dashboard': { path: '/', description: 'Main user dashboard with analytics and data' },
+    'crop recommendation': { path: '/crop-recommendation', description: 'AI-powered crop recommendations' },
+    'crop': { path: '/crop-recommendation', description: 'Crop recommendations' },
+    'smart mandi': { path: '/smart-mandi', description: 'Smart Mandi market prices' },
+    'mandi': { path: '/smart-mandi', description: 'Market prices and crop selling info' },
+    'market': { path: '/smart-mandi', description: 'Market prices' },
+    'calendar': { path: '/calendar', description: 'Farming planning calendar' },
+    'plan': { path: '/calendar', description: 'Planning calendar' },
 };
 
 async function browseExpert(state: typeof ChatState.State) {
