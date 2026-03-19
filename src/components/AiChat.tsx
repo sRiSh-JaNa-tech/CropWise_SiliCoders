@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Send, X, Bot, User, Loader2, MessageSquare, Mic, Square, Volume2, Image as ImageIcon, Wifi, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
@@ -263,9 +265,15 @@ const AiChat: React.FC = () => {
                     <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                       msg.sender === 'user' 
                         ? 'bg-primary text-white rounded-tr-none shadow-lg' 
-                        : 'bg-white/5 border border-white/10 text-gray-300 rounded-tl-none shadow-xl'
+                        : 'bg-white/5 border border-white/10 text-gray-300 rounded-tl-none shadow-xl prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-green-500 prose-strong:text-green-400 prose-sm'
                     }`}>
-                      {msg.text}
+                      {msg.sender === 'ai' ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.text}
+                        </ReactMarkdown>
+                      ) : (
+                        msg.text
+                      )}
                     </div>
                     {msg.sender === 'ai' && (
                       <button 
