@@ -15,7 +15,7 @@ class AgentState(TypedDict):
     category: str # 'scheme', 'market', 'profile', 'general'
 
 # 2. Router Node: Identifies User Intent
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
 
 async def router_node(state: AgentState):
     prompt = f"""

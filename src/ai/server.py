@@ -14,7 +14,7 @@ load_dotenv()
 
 # Initialize Google Generative AI
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 app = FastAPI(title="AgriCrop AI Free Voice Agent API")
 

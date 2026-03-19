@@ -9,7 +9,7 @@ import Signup from './pages/Signup';
 import PMSchemes from './pages/PMSchemes';
 
 // Lazy-load Tanya Dashboard (isolated module)
-const TanyaDashboard = lazy(() => import('./tanya-dashboard/pages/TanyaDashboard'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -37,10 +37,10 @@ function App() {
               <Route path="/calendar" element={<div className="p-8"><h2 className="text-3xl font-bold">Planning Calendar</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
               {/* Tanya Dashboard — Self-contained page with its own layout */}
               <Route
-                path="/tanya-dashboard"
+                path="/dashboard"
                 element={
                   <Suspense fallback={<div className="flex items-center justify-center h-screen text-lg">Loading Dashboard...</div>}>
-                    <TanyaDashboard />
+                    <Dashboard />
                   </Suspense>
                 }
               />

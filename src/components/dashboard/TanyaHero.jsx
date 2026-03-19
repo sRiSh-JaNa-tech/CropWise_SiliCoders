@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from './LanguageContext';
-import heroBg from '../assets/images/hero-bg.png';
+import heroBg from '../../assets/tanya/images/hero-bg.png';
 
 /**
  * TanyaHero — Full-width hero section with farming background,
