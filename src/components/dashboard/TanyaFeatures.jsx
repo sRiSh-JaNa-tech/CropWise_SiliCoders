@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Landmark, ScanSearch, TrendingUp, CalendarDays } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from './LanguageContext';
 
 /**
@@ -12,6 +13,7 @@ export default function TanyaFeatures() {
   const [visible, setVisible] = useState(false);
   const sectionRef = useRef(null);
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const FEATURES = [
     {
@@ -76,6 +78,10 @@ export default function TanyaFeatures() {
           return (
             <div
               key={feature.titleKey}
+              onClick={() => {
+                if (feature.titleKey === 'pmKisanTitle') navigate('/pm-kisan');
+                else if (feature.titleKey === 'farmingPlannerTitle') navigate('/smart-planner');
+              }}
               className={`group relative bg-[#122F27] rounded-2xl p-6 border border-[#1FAF5A]/10
                 hover:border-[#1FAF5A]/50 hover:shadow-lg hover:shadow-[#1FAF5A]/10
                 hover:scale-[1.04] transition-all duration-500 ease-out cursor-pointer
