@@ -4,6 +4,7 @@ import TanyaNavbar from '../components/dashboard/TanyaNavbar';
 import TanyaHero from '../components/dashboard/TanyaHero';
 import TanyaFeatures from '../components/dashboard/TanyaFeatures';
 import TanyaWeather from '../components/dashboard/TanyaWeather';
+import TanyaSoilHeatmap from '../components/dashboard/TanyaSoilHeatmap';
 import TanyaFooter from '../components/dashboard/TanyaFooter';
 
 /**
@@ -18,6 +19,7 @@ export default function Dashboard() {
       <TanyaHero />
       <TanyaFeatures />
       <TanyaWeather />
+      <TanyaSoilHeatmap />
       <TanyaFooter />
     </div>
   );
