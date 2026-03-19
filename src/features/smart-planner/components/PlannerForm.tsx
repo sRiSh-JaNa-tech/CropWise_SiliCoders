@@ -87,9 +87,25 @@ export const PlannerForm: React.FC<PlannerFormProps> = ({ onSubmit, isLoading })
         </div>
       </div>
 
-      <button disabled={isLoading} type="submit" className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50">
-        <AutoTranslate text={isLoading ? 'Generating Plan...' : 'Generate Smart Plan'} />
-      </button>
+      <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <button 
+          disabled={isLoading} 
+          type="submit" 
+          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+        >
+          <AutoTranslate text={isLoading ? 'Generating...' : 'Standard Plan'} />
+        </button>
+
+        <button 
+          disabled={isLoading}
+          type="button"
+          onClick={() => onSubmit({ ...formData, aiMode: true })}
+          className="flex-1 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <AutoTranslate text={isLoading ? 'AI Thinking...' : 'Smart AI Generation'} />
+        </button>
+      </div>
     </form>
   );
 };

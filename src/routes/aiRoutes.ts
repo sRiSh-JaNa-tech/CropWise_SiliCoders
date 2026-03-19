@@ -39,7 +39,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
 // ── POST /api/ai/chat — Text Chat ──────────────────────────────────────────
 router.post('/chat', async (req: Request, res: Response) => {
     try {
-        const { query, aadhaar, connectivity, location, dialect, image_data } = req.body;
+        const { query, aadhaar, connectivity, location, dialect, image_data, planner_input } = req.body;
         if (!query && !image_data) return res.status(400).json({ error: 'query or image is required' });
 
         const result = await withRetry(() => chatGraph.invoke({
@@ -54,6 +54,8 @@ router.post('/chat', async (req: Request, res: Response) => {
             image_data: image_data || null,
             location: location || null,
             dialect: dialect || 'English',
+            planner_input: planner_input || null,
+            planner_output: null,
         }));
 
         res.json({ response: result.response, category: result.category, redirect: result.redirect });
@@ -71,7 +73,7 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
     try {
         if (!req.file) return res.status(400).json({ error: 'audio file required' });
         
-        const { aadhaar, connectivity, location, dialect } = req.body;
+        const { aadhaar, connectivity, location, dialect, planner_input } = req.body;
 
         // 1. Transcribe using OpenAI Whisper
         const file = new File([new Uint8Array(req.file.buffer)], 'audio.wav', { type: 'audio/wav' });
@@ -95,6 +97,8 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
             image_data: null,
             location: location ? JSON.parse(location) : null,
             dialect: dialect || 'English',
+            planner_input: planner_input ? JSON.parse(planner_input) : null,
+            planner_output: null,
         }));
 
         res.json({ user_text: userText, response: result.response, category: result.category, redirect: result.redirect });
