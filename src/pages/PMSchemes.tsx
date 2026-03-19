@@ -97,9 +97,9 @@ const PMSchemes = () => {
                 </div>
               </div>
 
-              <a 
-                href={scheme.officialWebsite} 
-                target="_blank" 
+              <a
+                href={scheme.officialWebsite}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-white text-gray-300 hover:text-black rounded-xl font-bold text-sm transition-all border border-white/10"
               >

@@ -7,7 +7,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType>({
   currentLanguage: 'en',
-  setLanguage: () => {},
+  setLanguage: () => { },
 });
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -23,16 +23,16 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const cachedLang = localStorage.getItem('user_language_preference');
 
       if (cachedLang && supported.includes(cachedLang as string)) {
-          setCurrentLanguage(cachedLang as string);
+        setCurrentLanguage(cachedLang as string);
       } else if (supported.includes(browserLang)) {
-          setCurrentLanguage(browserLang);
+        setCurrentLanguage(browserLang);
       }
-    } catch(e) {}
+    } catch (e) { }
   }, []);
 
   const handleSetLanguage = (lang: string) => {
-      setCurrentLanguage(lang);
-      localStorage.setItem('user_language_preference', lang);
+    setCurrentLanguage(lang);
+    localStorage.setItem('user_language_preference', lang);
   }
 
   return (
