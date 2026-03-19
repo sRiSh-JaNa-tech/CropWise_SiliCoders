@@ -20,18 +20,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar Panel */}
       <aside 
-        className={`fixed lg:sticky top-0 left-0 h-screen pt-20 pb-6 bg-[#0a0f0a]/95 backdrop-blur-xl border-r border-white/10 w-64 z-40 transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20 xl:w-64'
+        className={`fixed top-0 left-0 h-screen pt-20 pb-6 bg-[#0a0f0a]/95 backdrop-blur-xl border-r border-white/10 w-64 z-40 transition-transform duration-300 ease-in-out flex flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <nav className="flex-1 px-3 space-y-2 mt-4 overflow-y-auto">
@@ -48,26 +48,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                     ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
-                onClick={() => window.innerWidth < 1024 && setIsOpen(false)}
+                onClick={() => setIsOpen(false)}
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : 'text-gray-500 group-hover:text-gray-300'}`} />
-                <span className={`font-medium whitespace-nowrap lg:hidden xl:block ${!isOpen && 'hidden lg:hidden'}`}>
+                <span className="font-medium whitespace-nowrap">
                   {item.name}
                 </span>
-                
-                {/* Tooltip for collapsed lg view */}
-                {!isOpen && (
-                  <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-xs rounded text-white opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap hidden lg:block xl:hidden z-50">
-                    {item.name}
-                  </div>
-                )}
               </Link>
             );
           })}
         </nav>
 
         <div className="px-6 pb-4 mt-auto">
-          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20 to-transparent border border-primary/20 text-sm hidden xl:block">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20 to-transparent border border-primary/20 text-sm">
             <h4 className="font-bold text-white mb-1">Need Help?</h4>
             <p className="text-gray-400 text-xs mb-3">Ask our AI inside the chat below.</p>
           </div>
