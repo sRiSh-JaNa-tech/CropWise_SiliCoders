@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "nodemon --exec npx tsx src/server.ts",
     "dev:ui": "vite",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:ui\"",
+    "dev:ai": "python src/ai/server.py",
+    "install:ai": "pip install -r src/ai/requirements.txt",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:ui\" \"npm run dev:ai\"",
+    "start": "concurrently \"npm run dev:server\" \"npm run dev:ai\"",
     "build": "vite build",
     "preview": "vite preview",
     "seed": "tsx src/assets/fillDatabase.ts"
