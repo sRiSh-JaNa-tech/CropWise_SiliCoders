@@ -43,9 +43,8 @@ export default function TanyaHero() {
 
       {/* Content */}
       <div
-        className={`relative z-10 text-center px-4 max-w-4xl mx-auto transition-all duration-1000 ease-out ${
-          visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
+        className={`relative z-10 text-center px-4 max-w-4xl mx-auto transition-all duration-1000 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
       >
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-[#1FAF5A]/30 bg-[#1FAF5A]/10 text-[#1FAF5A] text-sm font-medium">

@@ -101,11 +101,10 @@ export default function TanyaNavbar() {
                     <button
                       key={lang}
                       onClick={() => handleLangSelect(lang)}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150 ${
-                        language === lang
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150 ${language === lang
                           ? 'text-[#1FAF5A] bg-[#1FAF5A]/10'
                           : 'text-gray-300 hover:text-white hover:bg-[#1FAF5A]/5'
-                      }`}
+                        }`}
                     >
                       {lang}
                     </button>

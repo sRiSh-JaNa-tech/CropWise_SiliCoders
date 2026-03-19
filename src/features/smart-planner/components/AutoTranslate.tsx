@@ -12,11 +12,11 @@ export const AutoTranslate: React.FC<AutoTranslateProps> = ({ text }) => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     // Quick escape if translating to english or empty text
     if (!text || currentLanguage === 'en') {
-        setTranslated(text);
-        return;
+      setTranslated(text);
+      return;
     }
 
     const performTranslation = async () => {
@@ -25,7 +25,7 @@ export const AutoTranslate: React.FC<AutoTranslateProps> = ({ text }) => {
         setTranslated(result);
       }
     };
-    
+
     performTranslation();
 
     return () => { isMounted = false; };
