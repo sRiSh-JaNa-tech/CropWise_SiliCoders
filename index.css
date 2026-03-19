@@ -216,3 +216,26 @@ body {
     width: 100%;
   }
 }
+
+/* --- Google Translate Overrides --- */
+iframe.goog-te-banner-frame, 
+.goog-te-banner-frame,
+#goog-gt-tt, 
+.goog-te-balloon-frame {
+    display: none !important;
+}
+body {
+    top: 0px !important;
+    position: static !important;
+}
+html {
+    height: auto !important;
+}
+.goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+/* Force hide the original language selector widget */
+.goog-te-gadget {
+    display: none !important;
+}
