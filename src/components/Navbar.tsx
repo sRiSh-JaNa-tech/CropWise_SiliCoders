@@ -50,23 +50,23 @@ const Navbar: React.FC = () => {
                 <AlertCircle className="w-6 h-6 text-yellow-500 relative z-10" />
                 
                 {/* Tooltip */}
-                <div className="absolute top-full right-0 mt-3 w-64 p-3 bg-gray-900 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-[11px]">
+                <Link to="/account" className="absolute top-full right-0 mt-3 w-64 p-3 bg-gray-900 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity text-[11px] block z-50">
                   <p className="font-bold text-yellow-500 mb-1">
                     <AutoTranslate text="Profile Incomplete" />
                   </p>
                   <p className="text-gray-400 leading-relaxed">
-                    <AutoTranslate text={`A few documents are missing from your profile (${user.missingDocs.length} items). Please upload them at your convenience to unlock all PM schemes.`} />
+                    <AutoTranslate text={`A few documents are missing from your profile (${user.missingDocs.length} items). Click here to upload them and unlock all PM schemes.`} />
                   </p>
-                </div>
+                </Link>
               </div>
             )}
 
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mr-1 sm:mr-2">
+            <Link to="/account" className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mr-1 sm:mr-2 hover:bg-white/10 transition-colors">
               <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
                 <User className="w-3.5 h-3.5 text-primary" />
               </div>
               <span className="text-xs font-bold hidden sm:block">{user.name.split(' ')[0]}</span>
-            </div>
+            </Link>
 
             <button 
               onClick={handleLogout}

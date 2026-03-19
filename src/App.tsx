@@ -7,6 +7,7 @@ import AiChat from './components/AiChat';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PMSchemes from './pages/PMSchemes';
+import Account from './pages/Account';
 import { SmartPlannerDashboard } from './features/smart-planner/pages/SmartPlannerDashboard';
 import { LanguageProvider as UpstreamLanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -44,6 +45,7 @@ function App() {
                       <Route path="/old-home" element={<Hero />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
+                      <Route path="/account" element={<Account />} />
                       <Route path="/pm-kisan" element={<PMSchemes />} />
                       <Route path="/crop-recommendation" element={<div className="p-8"><h2 className="text-3xl font-bold">Crop Recommendation</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
                       <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
