@@ -4,13 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AutoTranslate } from '../features/smart-planner/components/AutoTranslate';
 import { LanguageSelector } from '../features/smart-planner/components/LanguageSelector';
+import { useSidebar } from '../context/SidebarContext';
 
-interface NavbarProps {
-  toggleSidebar: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
+const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
 
   const handleLogout = () => {

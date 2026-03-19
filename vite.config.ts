@@ -4,13 +4,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const port = env.PORT || 5280;
+  const port = parseInt(env.PORT || '5280');
+  const backendPort = parseInt(env.BACKEND_PORT || '5281');
 
   return {
     server: {
+      port: port,
       proxy: {
         '/api': {
-          target: `http://localhost:${port}`,
+          target: `http://localhost:${backendPort}`,
           changeOrigin: true,
         }
       }

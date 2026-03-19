@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const PORT = process.env.PORT || 5280;
+const PORT = process.env.BACKEND_PORT || 5281;
 const MONGO_URI = process.env.MONGO_URL || process.env.DB_URI || 'mongodb://127.0.0.1:27017/cropwise_planner';
 
 // Start server immediately to serve API routes (like Translation) even if DB is down
 app.listen(PORT, () => {
-    console.log(`AgriCrop Server initialized on http://localhost:${PORT}`);
+    console.log(`Express Backend initialized on port ${PORT}`);
 });
 
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
