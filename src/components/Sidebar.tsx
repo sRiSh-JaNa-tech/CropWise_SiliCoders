@@ -1,13 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Sprout, TrendingUp, CalendarDays, X } from 'lucide-react';
+import { LayoutDashboard, FileText, Sprout, TrendingUp, CalendarDays } from 'lucide-react';
+import { useSidebar } from '../context/SidebarContext';
 
-interface SidebarProps {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+const Sidebar: React.FC = () => {
+  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
   const location = useLocation();
 
   const menuItems = [
@@ -21,17 +18,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/60 z-[80] backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar Panel */}
       <aside 
-        className={`fixed top-0 left-0 h-screen pt-20 pb-6 bg-[#0a0f0a]/95 backdrop-blur-xl border-r border-white/10 w-64 z-40 transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 h-screen pt-20 pb-6 bg-[#0a0f0a]/95 backdrop-blur-xl border-r border-white/10 w-64 z-[80] transition-transform duration-300 ease-in-out flex flex-col ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <nav className="flex-1 px-3 space-y-2 mt-4 overflow-y-auto">
@@ -48,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                     ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
-                onClick={() => setIsOpen(false)}
+                onClick={() => setIsSidebarOpen(false)}
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : 'text-gray-500 group-hover:text-gray-300'}`} />
                 <span className="font-medium whitespace-nowrap">

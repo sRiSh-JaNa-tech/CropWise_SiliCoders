@@ -5,6 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import schemeRoutes from './routes/schemeRoutes.js';
+import mongoose from 'mongoose';
+import tanyaWeatherRoutes from './tanya-dashboard/api/weatherRoutes.js';
 
 // Setup for ES Modules __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -24,11 +26,23 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/schemes', schemeRoutes);
 
+// ─── MongoDB Connection ───
+const MONGO_URL = process.env.MONGO_URL;
+if (MONGO_URL) {
+  mongoose.connect(MONGO_URL)
+    .then(() => console.log('✅ MongoDB connected successfully'))
+    .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+} else {
+  console.warn('⚠️  MONGO_URL not set in .env — weather data will not be persisted');
+}
+
 // API Endpoints
 app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'AgriCrop server is perfectly integrated and healthy!' });
 });
 
+// ─── Tanya Dashboard Weather API ───
+app.use('/api/tanya', tanyaWeatherRoutes);
 app.use('/api/planner', plannerRoutes);
 app.use('/api', translationRoutes);
 
@@ -42,3 +56,4 @@ app.use((req: Request, res: Response) => {
 });
 
 export default app;
+
