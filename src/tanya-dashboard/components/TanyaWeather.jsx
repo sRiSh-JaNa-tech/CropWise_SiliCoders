@@ -5,8 +5,6 @@ import {
   CloudRain,
   Wind,
   MapPin,
-  Sun,
-  Cloud,
 } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
 
@@ -87,36 +85,29 @@ export default function TanyaWeather() {
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        {/* Map Placeholder */}
-        <div className="relative rounded-2xl overflow-hidden bg-[#122F27] border border-[#1FAF5A]/10 min-h-[320px] flex flex-col items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#122F27] via-[#0B1F1A] to-[#122F27]" />
-          <div className="absolute inset-0 opacity-10">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={`h-${i}`}
-                className="absolute w-full h-px bg-[#1FAF5A]/50"
-                style={{ top: `${(i + 1) * 12}%` }}
-              />
-            ))}
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={`v-${i}`}
-                className="absolute h-full w-px bg-[#1FAF5A]/50"
-                style={{ left: `${(i + 1) * 12}%` }}
-              />
-            ))}
-          </div>
+        {/* Real Interactive Map */}
+        <div className="relative rounded-2xl overflow-hidden bg-[#122F27] border border-[#1FAF5A]/10 min-h-[320px]">
+          {/* OpenStreetMap Embed */}
+          <iframe
+            title="Location Map"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=76.8%2C28.4%2C77.4%2C28.8&layer=mapnik&marker=28.6139,77.2090"
+            className="w-full h-full absolute inset-0"
+            style={{ minHeight: '320px', border: 'none', filter: 'brightness(0.8) contrast(1.1) saturate(0.8)' }}
+            loading="lazy"
+            allowFullScreen
+          />
 
-          <div className="relative z-10 flex flex-col items-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-[#1FAF5A]/10 flex items-center justify-center animate-pulse">
-              <MapPin className="w-8 h-8 text-[#1FAF5A]" />
+          {/* Dark overlay for theme consistency */}
+          <div className="absolute inset-0 bg-[#0B1F1A]/30 pointer-events-none" />
+
+          {/* Location badge overlay */}
+          <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#122F27]/90 backdrop-blur-md border border-[#1FAF5A]/20">
+            <MapPin className="w-4 h-4 text-[#1FAF5A]" />
+            <div>
+              <p className="text-white text-sm font-semibold">{t('yourLocation')}</p>
+              <p className="text-gray-400 text-xs">{t('locationName')}</p>
             </div>
-            <p className="text-white font-semibold text-lg">{t('yourLocation')}</p>
-            <p className="text-gray-400 text-sm">{t('locationName')}</p>
           </div>
-
-          <Sun className="absolute top-6 right-8 w-6 h-6 text-[#F4C430]/20 animate-spin" style={{ animationDuration: '20s' }} />
-          <Cloud className="absolute bottom-8 left-8 w-8 h-8 text-gray-600/30" />
         </div>
 
         {/* Weather Stats Cards */}

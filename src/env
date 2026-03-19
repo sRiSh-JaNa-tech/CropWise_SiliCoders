@@ -1,0 +1,2 @@
+MONGO_URL=mongodb+srv://root:root@cluster0.y6n2ofo.mongodb.net/QuantEdge?retryWrites=true&w=majority
+PORT=5280
