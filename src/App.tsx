@@ -4,37 +4,42 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import AiChat from './components/AiChat';
+import { SmartPlannerDashboard } from './features/smart-planner/pages/SmartPlannerDashboard';
+import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <Router>
-      <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white">
-        {/* Fixed Navbar */}
-        <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+    <LanguageProvider>
+      <Router>
+        <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white">
+          {/* Fixed Navbar */}
+          <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="flex flex-1 pt-20">
-          {/* Collapsible Sidebar */}
-          <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+          <div className="flex flex-1 pt-20">
+            {/* Collapsible Sidebar */}
+            <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-          {/* Main Content Area */}
-          <main className="flex-1 transition-all duration-300 relative">
-            <Routes>
-              <Route path="/" element={<Hero />} />
-              {/* Dummy routes for sidebar links */}
-              <Route path="/pm-kisan" element={<div className="p-8"><h2 className="text-3xl font-bold">PM-Kisan Enrollment</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-              <Route path="/crop-recommendation" element={<div className="p-8"><h2 className="text-3xl font-bold">Crop Recommendation</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-              <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-              <Route path="/calendar" element={<div className="p-8"><h2 className="text-3xl font-bold">Planning Calendar</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
-            </Routes>
-          </main>
+            {/* Main Content Area */}
+            <main className="flex-1 transition-all duration-300 relative">
+              <Routes>
+                <Route path="/" element={<Hero />} />
+                {/* Dummy routes for sidebar links */}
+                <Route path="/pm-kisan" element={<div className="p-8"><h2 className="text-3xl font-bold">PM-Kisan Enrollment</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+                <Route path="/crop-recommendation" element={<div className="p-8"><h2 className="text-3xl font-bold">Crop Recommendation</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+                <Route path="/smart-mandi" element={<div className="p-8"><h2 className="text-3xl font-bold">Smart Mandi</h2><p className="text-text-dim mt-4">Feature coming soon.</p></div>} />
+                <Route path="/calendar" element={<SmartPlannerDashboard />} />
+                <Route path="/smart-planner" element={<SmartPlannerDashboard />} />
+              </Routes>
+            </main>
+          </div>
+
+          {/* Global AI Chatbot */}
+          <AiChat />
         </div>
-
-        {/* Global AI Chatbot */}
-        <AiChat />
-      </div>
-    </Router>
+      </Router>
+    </LanguageProvider>
   );
 }
 

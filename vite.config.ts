@@ -1,17 +1,21 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const port = env.PORT || 5000;
+
+  return {
+    server: {
+      proxy: {
+        '/api': {
+          target: `http://localhost:${port}`,
+          changeOrigin: true,
+        }
       }
-    }
-  },
-  plugins: [
+    },
+    plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -42,4 +46,4 @@ export default defineConfig({
       }
     })
   ]
-});
+}});
