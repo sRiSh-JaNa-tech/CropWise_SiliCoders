@@ -2,7 +2,8 @@
  * AI Routes — All AI endpoints consolidated into Express
  * Replaces the Python FastAPI server entirely.
  */
-import express, { Request, Response } from 'express';
+import * as express from 'express';
+import { Request, Response } from 'express';
 import multer from 'multer';
 import OpenAI from 'openai';
 import { chatGraph } from '../services/ai/chatGraph.js';
@@ -39,7 +40,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
 // ── POST /api/ai/chat — Text Chat ──────────────────────────────────────────
 router.post('/chat', async (req: Request, res: Response) => {
     try {
-        const { query, aadhaar, connectivity, location, dialect, image_data, planner_input } = req.body;
+        const { query, aadhaar, connectivity, location, dialect, image_data, planner_input, category } = req.body;
         if (!query && !image_data) return res.status(400).json({ error: 'query or image is required' });
 
         const result = await withRetry(() => chatGraph.invoke({
@@ -48,7 +49,7 @@ router.post('/chat', async (req: Request, res: Response) => {
             user_data: null,
             scheme_data: null,
             response: '',
-            category: '',
+            category: category || '',
             redirect: null,
             connectivity: connectivity || 'high',
             image_data: image_data || null,
@@ -58,7 +59,12 @@ router.post('/chat', async (req: Request, res: Response) => {
             planner_output: null,
         }));
 
-        res.json({ response: result.response, category: result.category, redirect: result.redirect });
+        res.json({ 
+            response: result.response, 
+            category: result.category, 
+            redirect: result.redirect,
+            openClawActions: result.openClawActions 
+        });
     } catch (err: any) {
         console.error('Chat error:', err.message);
         if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
@@ -101,7 +107,13 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
             planner_output: null,
         }));
 
-        res.json({ user_text: userText, response: result.response, category: result.category, redirect: result.redirect });
+        res.json({ 
+            user_text: userText, 
+            response: result.response, 
+            category: result.category, 
+            redirect: result.redirect,
+            openClawActions: result.openClawActions 
+        });
     } catch (err: any) {
         console.error('Audio-chat error:', err.message);
         res.status(500).json({ error: err.message });
@@ -176,7 +188,7 @@ router.get('/tasks/status/:id', async (req: Request, res: Response) => {
 router.get('/tasks/logs/:id', async (req: Request, res: Response) => {
     try {
         const logs = await AgentLog.find({ taskId: req.params.id }).sort({ createdAt: 1 });
-        res.json({ task_id: req.params.id, logs: logs.map(l => ({
+        res.json({ task_id: req.params.id, logs: logs.map((l: any) => ({
             node: l.nodeName,
             action: l.action,
             result: l.result?.slice(0, 500),
@@ -190,7 +202,7 @@ router.get('/tasks/logs/:id', async (req: Request, res: Response) => {
 router.get('/tasks/pages/:id', async (req: Request, res: Response) => {
     try {
         const pages = await PageData.find({ taskId: req.params.id }).sort({ createdAt: 1 });
-        res.json({ task_id: req.params.id, pages: pages.map(p => ({
+        res.json({ task_id: req.params.id, pages: pages.map((p: any) => ({
             url: p.url,
             title: p.title,
             headings: p.headings,

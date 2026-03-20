@@ -129,7 +129,7 @@ export default function TanyaSoilHeatmap() {
     <section 
       id="tanya-soil-heatmap"
       ref={sectionRef}
-      className="relative py-20 sm:py-28 px-4 bg-[#0B1F1A] overflow-hidden"
+      className="relative pt-10 pb-20 sm:pt-12 sm:pb-28 px-4 bg-[#0B1F1A] overflow-hidden"
     >
       {/* Background Decorative Blur */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1FAF5A]/5 blur-[120px] rounded-full pointer-events-none" />

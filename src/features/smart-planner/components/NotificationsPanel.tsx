@@ -6,14 +6,14 @@ interface NotificationsPanelProps {
   events: any[];
 }
 
-export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ events }) => {
+export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ events }: NotificationsPanelProps) => {
   // Find events occurring today or tomorrow
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   const upcoming = events.filter(e => {
-    if (!e.reminder) return false;
+    if (!e.reminder || e.id?.toString().startsWith('ai-plan')) return false;
     const d = new Date(e.startDate);
     return d >= new Date(now.getTime() - 86400000) && d <= tomorrow;
   });
@@ -29,7 +29,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ events }
         <p className="text-sm text-green-800 opacity-80"><AutoTranslate text="No immediate tasks due today or tomorrow." /></p>
       ) : (
         <ul className="space-y-2">
-          {upcoming.map(item => (
+          {upcoming.map((item: any) => (
             <li key={`alert-${item.id}`} className="bg-white p-3 rounded-lg shadow-sm border border-green-100 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <div>

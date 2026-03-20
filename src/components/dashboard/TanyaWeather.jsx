@@ -147,7 +147,7 @@ export default function TanyaWeather() {
     <section
       id="tanya-weather"
       ref={sectionRef}
-      className="relative py-20 sm:py-28 px-4 bg-[#0B1F1A]"
+      className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 px-4 bg-[#0B1F1A]"
     >
       {/* Section Header */}
       <div className="max-w-7xl mx-auto text-center mb-8">

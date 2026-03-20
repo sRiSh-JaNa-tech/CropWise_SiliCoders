@@ -1,0 +1,54 @@
+[
+  {
+    "id": "tomato_early_blight",
+    "crop": "Tomato",
+    "disease": "Early Blight",
+    "symptoms": [
+      "Small brown spots with concentric rings on lower leaves",
+      "Yellowing of surrounding tissue",
+      "Stem lesions and fruit rot in advanced stages"
+    ],
+    "organic_treatment": "Apply Neem oil every 7 days. Remove infected lower leaves. Ensure proper spacing for airflow.",
+    "chemical_treatment": "Use Copper-based fungicides or Chlorothalonil according to label instructions.",
+    "ag_code": "TOM_E_BLIGHT"
+  },
+  {
+    "id": "potato_late_blight",
+    "crop": "Potato",
+    "disease": "Late Blight",
+    "symptoms": [
+      "Water-soaked grayish-green spots on leaves",
+      "White fungal growth on leaf undersides in humid weather",
+      "Dark brown lesions on stems"
+    ],
+    "organic_treatment": "Copper soap fungicide. Sterilize tools after contact with infected plants.",
+    "chemical_treatment": "Mancozeb or Metalaxyl applied as a preventive measure.",
+    "ag_code": "POT_L_BLIGHT"
+  },
+  {
+    "id": "rice_blast",
+    "crop": "Rice",
+    "disease": "Blast",
+    "symptoms": [
+      "Spindle-shaped spots with gray centers on leaves",
+      "Brown lesions on the nodes and neck of the panicle",
+      "Empty or partially filled grains"
+    ],
+    "organic_treatment": "Burn infected straw. Avoid excessive nitrogen fertilizer.",
+    "chemical_treatment": "Tricyclazole or Carbendazim applications.",
+    "ag_code": "RIC_BLAST"
+  },
+  {
+    "id": "wheat_rust",
+    "crop": "Wheat",
+    "disease": "Rust (Yellow/Stripe)",
+    "symptoms": [
+      "Linear rows of yellow-orange pustules on leaves",
+      "Weakened stalks and shriveled grains",
+      "Premature drying of leaves"
+    ],
+    "organic_treatment": "Use resistant varieties. Practice crop rotation with non-host crops.",
+    "chemical_treatment": "Propiconazole or Tebuconazole foliar sprays.",
+    "ag_code": "WHE_RUST"
+  }
+]

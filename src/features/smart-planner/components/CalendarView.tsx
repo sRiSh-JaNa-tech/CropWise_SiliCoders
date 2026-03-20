@@ -1,5 +1,6 @@
 import React from 'react';
 import { EventCard } from './EventCard';
+import { AICardRenderer } from './AICardRenderer';
 import { AutoTranslate } from './AutoTranslate';
 
 interface CalendarViewProps {
@@ -11,6 +12,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
     return (
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center text-gray-500">
         <AutoTranslate text="No farming tasks scheduled yet. Formulate a plan above to get started." />
+      </div>
+    );
+  }
+
+  // Handle AI Integrated strategy specially
+  const aiPlan = events.find((e: any) => e.id?.toString().startsWith('ai-plan'));
+  if (aiPlan) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+           <div className="h-px bg-white/20 flex-1" />
+           <p className="text-xs font-black text-white/60 uppercase tracking-widest px-4 border border-white/20 rounded-full py-1 backdrop-blur-sm">
+             <AutoTranslate text="AI Generated Master Plan" />
+           </p>
+           <div className="h-px bg-white/20 flex-1" />
+        </div>
+        <AICardRenderer text={aiPlan.description} />
       </div>
     );
   }
@@ -35,12 +53,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
             {groupedEvents[month].map((event: any) => (
               <EventCard 
                 key={event.id}
-                title={event.title}
-                date={event.startDate}
-                description={event.description}
-                priority={event.priority}
-                icon={event.icon}
-                tips={event.tips}
+                event={event}
               />
             ))}
           </div>

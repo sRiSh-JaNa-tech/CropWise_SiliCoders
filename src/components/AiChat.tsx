@@ -1,9 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Send, X, Bot, User, Loader2, MessageSquare, Mic, Square, Volume2, Image as ImageIcon, Wifi, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.js';
+import { useAuth } from '../context/AuthContext';
+import { useOpenClaw } from '../context/OpenClawContext';
+import { useConnectivity } from '../context/ConnectivityContext';
 
 interface Message {
   id: number;
@@ -20,10 +23,11 @@ const AiChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [connectivity, setConnectivity] = useState<'high'|'low'|'zero'>('high');
+  const { connectivity, setConnectivity } = useConnectivity();
   const [dialect, setDialect] = useState('English');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { executeActions } = useOpenClaw();
   
   // Fake exact location for UP/Ghaziabad based on requirement
   const locationContext = JSON.stringify({ lat: 28.6692, lon: 77.4538 }); 
@@ -52,7 +56,15 @@ const AiChat: React.FC = () => {
 
   const speak = (text: string) => {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Convert diverse markdown redirect formatting into clean text for native audio
+    const cleanText = text
+      .replace(/[*_~`>#]/g, '') // Remove formatting symbols like *, _, ~, >, #
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links [text](url) to text
+      .replace(/\n\s*-\s+/g, '. ') // Turn list items into sentences
+      .replace(/\n+/g, ' '); // Flatten newlines
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'en-IN';
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
@@ -116,6 +128,10 @@ const AiChat: React.FC = () => {
         }
       }
 
+      if (data.openClawActions && Array.isArray(data.openClawActions)) {
+        setTimeout(() => executeActions(data.openClawActions), 500);
+      }
+
       setMessages(prev => [
         ...prev, 
         { id: Date.now(), text: data.user_text, sender: 'user' },
@@ -169,6 +185,10 @@ const AiChat: React.FC = () => {
         } else if (data.redirect.startsWith('http')) {
           window.open(data.redirect, '_blank');
         }
+      }
+
+      if (data.openClawActions && Array.isArray(data.openClawActions)) {
+        setTimeout(() => executeActions(data.openClawActions), 500);
       }
 
       const aiMessage: Message = { 

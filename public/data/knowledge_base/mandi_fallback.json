@@ -1,0 +1,9 @@
+{
+  "last_updated": "2026-03-20",
+  "data": [
+    { "crop": "Tomato", "region": "UP", "avg_price": "2,400", "unit": "Quintal" },
+    { "crop": "Wheat", "region": "Punjab", "avg_price": "2,275", "unit": "Quintal" },
+    { "crop": "Rice", "region": "WB", "avg_price": "2,183", "unit": "Quintal" },
+    { "crop": "Potato", "region": "UP", "avg_price": "1,800", "unit": "Quintal" }
+  ]
+}

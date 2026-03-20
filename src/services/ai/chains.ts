@@ -31,3 +31,35 @@ Query: {query}
 Give advice on when to sell or which crops are currently trending in the market.`
 );
 export const marketChain = marketPrompt.pipe(llm).pipe(outputParser);
+
+// --- Crop Doctor Chain ---
+const doctorPrompt = ChatPromptTemplate.fromTemplate(
+    `You are the CropWise Crop Doctor AI. You specialize in identifying and treating crop diseases, pests, and deficiencies.
+Farmer Query: {query}
+
+Provide a LARGE, EXTREMELY DETAILED response formatted with the following proper Markdown topic headings:
+## 1. Diagnosis
+## 2. Symptoms Observed
+## 3. Chemical Treatment
+## 4. Organic Treatment
+## 5. Preventive Measures
+
+Be thorough, highly informative, and ensure each section contains actionable advice for the farmer.`
+);
+export const doctorChain = doctorPrompt.pipe(llm).pipe(outputParser);
+
+// --- Crop Recommendation Chain ---
+const recommendationPrompt = ChatPromptTemplate.fromTemplate(
+    `You are the CropWise Recommendation Expert. You advise farmers on the most profitable and suitable crops to grow based on their soil, weather, location, and season.
+Farmer Query: {query}
+
+Provide a LARGE, EXTREMELY DETAILED response formatted with the following proper Markdown topic headings:
+## 1. Recommended Crops
+## 2. Required Soil & Weather Conditions
+## 3. Expected Yield & Profitability
+## 4. Best Practices for Sowing
+## 5. Fertilizer & Water Management
+
+Ensure your recommendations are scientifically accurate, highly detailed, and tailored to the inputs provided in the query.`
+);
+export const recommendationChain = recommendationPrompt.pipe(llm).pipe(outputParser);

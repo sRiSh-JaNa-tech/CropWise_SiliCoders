@@ -1,0 +1,23 @@
+[
+  {
+    "crop": "Tomato",
+    "soil_requirement": "Ph 6.0-6.8, Well-drained loamy soil.",
+    "water_need": "Consistent moisture, avoid overhead watering to prevent fungus.",
+    "best_season": "Warm weather (Summer/Kharif)",
+    "ag_code": "TMT_INFO"
+  },
+  {
+    "crop": "Wheat",
+    "soil_requirement": "Well-drained loamy or clayey-loam soil.",
+    "water_need": "Intermediate, critical at crown root initiation and flowering.",
+    "best_season": "Cool weather (Rabi/Winter)",
+    "ag_code": "WHT_INFO"
+  },
+  {
+    "crop": "Rice",
+    "soil_requirement": "Clayey loams with high water holding capacity.",
+    "water_need": "High, standing water during initial growth is preferred.",
+    "best_season": "Warm/Humid (Kharif/Rainy)",
+    "ag_code": "RIC_INFO"
+  }
+]

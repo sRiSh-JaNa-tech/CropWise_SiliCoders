@@ -16,55 +16,63 @@ import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider as TanyaLanguageProvider } from './components/dashboard/LanguageContext';
 import { SidebarProvider } from './context/SidebarContext';
 
+import { OpenClawProvider } from './context/OpenClawContext';
+
 // Lazy-load Tanya Dashboard (isolated module)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+
+import { ConnectivityProvider } from './context/ConnectivityContext';
 
 function App() {
   return (
     <AuthProvider>
-      <UpstreamLanguageProvider>
+      <ConnectivityProvider>
+        <UpstreamLanguageProvider>
         <TanyaLanguageProvider>
           <SidebarProvider>
             <Router>
-              <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white overflow-x-hidden">
-                {/* Global Original Working Navbar */}
-                <Navbar />
-                
-                <div className="flex flex-1 pt-16">
-                  <Sidebar />
-                  <main className="flex-1 transition-all duration-300 relative w-full overflow-hidden">
-                    <Routes>
-                      {/* Tanya Dashboard — Now wrapped in the working global layout! */}
-                      <Route
-                        path="/"
-                        element={
-                          <Suspense fallback={<div className="flex items-center justify-center p-20 text-lg">Loading Dashboard...</div>}>
-                            <Dashboard />
-                          </Suspense>
-                        }
-                      />
-                      
-                      <Route path="/old-home" element={<Hero />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      <Route path="/account" element={<Account />} />
-                      <Route path="/pm-kisan" element={<PMSchemes />} />
-                      <Route path="/crop-recommendation" element={<CropRecommendationPage />} />
-                      <Route path="/smart-mandi" element={<SmartMandiReturnsPage />} />
-                      
-                      {/* Upstream Smart Planner routes */}
-                      <Route path="/calendar" element={<SmartPlannerDashboard />} />
-                      <Route path="/smart-planner" element={<SmartPlannerDashboard />} />
-                    </Routes>
-                  </main>
+              <OpenClawProvider>
+                <div className="min-h-screen bg-dark text-white flex flex-col font-outfit selection:bg-primary selection:text-white overflow-x-hidden">
+                  {/* Global Original Working Navbar */}
+                  <Navbar />
+                  
+                  <div className="flex flex-1 pt-16">
+                    <Sidebar />
+                    <main className="flex-1 transition-all duration-300 relative w-full overflow-hidden">
+                      <Routes>
+                        {/* Tanya Dashboard — Now wrapped in the working global layout! */}
+                        <Route
+                          path="/"
+                          element={
+                            <Suspense fallback={<div className="flex items-center justify-center p-20 text-lg">Loading Dashboard...</div>}>
+                              <Dashboard />
+                            </Suspense>
+                          }
+                        />
+                        
+                        <Route path="/old-home" element={<Hero />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/account" element={<Account />} />
+                        <Route path="/pm-kisan" element={<PMSchemes />} />
+                        <Route path="/crop-recommendation" element={<CropRecommendationPage />} />
+                        <Route path="/smart-mandi" element={<SmartMandiReturnsPage />} />
+                        
+                        {/* Upstream Smart Planner routes */}
+                        <Route path="/calendar" element={<SmartPlannerDashboard />} />
+                        <Route path="/smart-planner" element={<SmartPlannerDashboard />} />
+                      </Routes>
+                    </main>
+                  </div>
+                  {/* Global AI Chatbot */}
+                  <AiChat />
                 </div>
-                {/* Global AI Chatbot */}
-                <AiChat />
-              </div>
+              </OpenClawProvider>
             </Router>
           </SidebarProvider>
         </TanyaLanguageProvider>
       </UpstreamLanguageProvider>
+      </ConnectivityProvider>
     </AuthProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { StateGraph, END, Annotation } from '@langchain/langgraph';
 import { llm, visionLlm } from './llm.js';
-import { schemeChain, profileChain, marketChain } from './chains.js';
+import { schemeChain, profileChain, marketChain, doctorChain, recommendationChain } from './chains.js';
 import PMScheme from '../../model/PMSchemes.js';
 import User from '../../model/User.js';
 import * as browser from '../agent/browserTools.js';
@@ -16,6 +16,7 @@ const ChatState = Annotation.Root({
     response: Annotation<string>,
     category: Annotation<string>,
     redirect: Annotation<string | null>,
+    openClawActions: Annotation<any[]>,
     
     // Master Agent Telemetry
     connectivity: Annotation<'high' | 'low' | 'zero'>,
@@ -42,6 +43,11 @@ async function routerNode(state: typeof ChatState.State) {
         return { category: 'vision' };
     }
 
+    if (state.category && state.category !== 'general' && state.category !== '') {
+        console.log(`  Router: using pre-set category → ${state.category}`);
+        return { category: state.category };
+    }
+
     const queryLower = state.query.toLowerCase();
 
     // Pre-check: if any browse keyword is present, force browse
@@ -57,13 +63,15 @@ async function routerNode(state: typeof ChatState.State) {
 - 'market': Questions about Mandi prices or selling crops.
 - 'profile': Questions about registration, documents, or Aadhaar.
 - 'planner': Questions about farming schedules, what to do next, or planning.
+- 'doctor': Questions about crop diseases, pests, health, symptoms, or crop diagnosis.
+- 'recommend': Questions about what crop to grow, seeds to plant, or soil suitability.
 - 'general': Anything else.
 
 Message: "${state.query}"
 Category:`;
     const res = await llm.invoke(prompt);
     const raw = (typeof res.content === 'string' ? res.content : '').trim().toLowerCase();
-    const category = ['scheme', 'market', 'profile', 'planner'].find(c => raw.includes(c)) || 'general';
+    const category = ['scheme', 'market', 'profile', 'planner', 'doctor', 'recommend'].find(c => raw.includes(c)) || 'general';
     console.log(`  Router: "${state.query}" → ${category} (LLM)`);
     return { category };
 }
@@ -122,13 +130,26 @@ async function generalExpert(state: typeof ChatState.State) {
 async function plannerExpert(state: typeof ChatState.State) {
     console.log(`  📅 Planner Expert generating schedule...`);
     const input = state.planner_input || {};
-    const prompt = `You are the CropWise Planner. Generate a detailed farming schedule for ${input.cropType || 'crops'} 
+    const prompt = `You are the CropWise Planner. Generate a LARGE, EXTREMELY DETAILED farming schedule for ${input.cropType || 'crops'} 
 Soil: ${input.soilType || 'standard'}, Farm Size: ${input.farmSize || '1 acre'}, Sowing Date: ${input.sowingDate || 'today'}.
-Provide 5 key tasks with dates, priority, and specific tips.
+
+Provide a response formatted with the following proper Markdown topic headings:
+## 1. Seasonal Strategy
+## 2. Critical Milestones
+## 3. Resource Management
+## 4. 📊 Analytics & Projections
+(In the Analytics section, include a CHART tag in this EXACT format: 
+[CHART: Bar, Expected Yield (kg/month), Month 1: 200, Month 2: 450, Month 3: 800, Month 4: 1200]
+or
+[CHART: Area, Nutrient Requirements, Nitrogen: 40, Phosphorus: 30, Potassium: 50, Micro: 10]
+)
+
+## 5. Risk Mitigation
+
 Format rules:
-1. Be precise with dates.
-2. Focus on maximizing yield.
-3. Use a helpful tone for an Indian farmer.`;
+1. Be precise with dates and quantities.
+2. Focus on maximizing yield and profit.
+3. Use a helpful, professional tone for a modern Indian farmer.`;
     
     const res = await llm.invoke(prompt);
     return { response: typeof res.content === 'string' ? res.content : 'Plan generated.' };
@@ -136,7 +157,6 @@ Format rules:
 
 async function mandiExpert(state: typeof ChatState.State) {
     console.log(`  📊 Mandi Expert analyzing prices...`);
-    // Mock mandi data for GHZ area
     const mandiContext = "Wheat: ₹2,275/quintal, Rice: ₹2,183/quintal, Potato: ₹1,540/quintal. Trend: Market peaking for Wheat.";
     const prompt = `Based on these Mandi prices: "${mandiContext}", answer the user's market question: "${state.query}".
 Provide expert advice on when to sell or which seeds to buy for the next season.`;
@@ -147,7 +167,6 @@ Provide expert advice on when to sell or which seeds to buy for the next season.
 
 async function weatherExpert(state: typeof ChatState.State) {
     console.log(`  ☁️ Weather Expert checking conditions...`);
-    // Mocking weather data integration
     const weatherInfo = "Current Temp: 28°C, Humidity: 65%, Forecast: Light rain expected in 2 days.";
     const prompt = `Based on this weather: "${weatherInfo}", adjust the agricultural advice for the user's query: "${state.query}".
 Original Advice: ${state.response || 'None'}`;
@@ -156,10 +175,16 @@ Original Advice: ${state.response || 'None'}`;
     return { response: typeof res.content === 'string' ? res.content : state.response };
 }
 
-// --- Master Agent Nodes ---
 async function visionExpert(state: typeof ChatState.State) {
     console.log(`  👁️ Vision Expert analyzing image...`);
-    const prompt = `Analyze this crop image for pests, fungal infections, or nutrient deficiencies. Prescribe actionable advice. Do not just "identify"; you must prescribe.
+    const prompt = `You are the CropWise Crop Doctor AI. Analyze this crop image for pests, fungal infections, or nutrient deficiencies. Prescribe actionable advice. Do not just "identify"; you must prescribe.
+Provide a LARGE, EXTREMELY DETAILED response formatted with the following proper Markdown topic headings:
+## 1. Diagnosis
+## 2. Symptoms Observed
+## 3. Chemical Treatment
+## 4. Organic Treatment
+## 5. Preventive Measures
+
 User Query: ${state.query}`;
     
     const res = await visionLlm.invoke([
@@ -202,7 +227,6 @@ Advice: ${state.response}`;
         return { response: typeof res.content === 'string' ? res.content : state.response };
     }
     
-    // High Signal (Path A)
     if (!state.dialect || state.dialect.toLowerCase() === 'english') {
         return { response: state.response };
     }
@@ -214,34 +238,19 @@ Advice: ${state.response}`;
     return { response: typeof res.content === 'string' ? res.content : state.response };
 }
 
-// --- Browse Expert: Offline-first local navigator ---
-// Internal sitemap of the CropWise application — NO LLM NEEDED for matching
+// --- Browse Expert ---
 const APP_BASE = 'http://127.0.0.1:5281';
 const APP_SITEMAP: Record<string, { path: string; description: string }> = {
-    'home': { path: '/', description: 'Main dashboard and landing page' },
-    'old home': { path: '/old-home', description: 'Original hero section' },
-    'pm schemes': { path: '/pm-kisan', description: 'PM Kisan and other government schemes for farmers' },
-    'schemes': { path: '/pm-kisan', description: 'Government schemes, benefits, eligibility' },
-    'pm kisan': { path: '/pm-kisan', description: 'PM Kisan Yojana scheme details' },
-    'kisan': { path: '/pm-kisan', description: 'PM Kisan Yojana' },
-    'login': { path: '/login', description: 'User login page' },
-    'signup': { path: '/signup', description: 'User registration page' },
-    'register': { path: '/signup', description: 'New user registration' },
-    'dashboard': { path: '/', description: 'Main user dashboard with analytics and data' },
-    'crop recommendation': { path: '/crop-recommendation', description: 'AI-powered crop recommendations' },
-    'crop': { path: '/crop-recommendation', description: 'Crop recommendations' },
-    'smart mandi': { path: '/smart-mandi', description: 'Smart Mandi market prices' },
-    'mandi': { path: '/smart-mandi', description: 'Market prices and crop selling info' },
-    'market': { path: '/smart-mandi', description: 'Market prices' },
-    'calendar': { path: '/calendar', description: 'Farming planning calendar' },
-    'plan': { path: '/calendar', description: 'Planning calendar' },
+    'home': { path: '/', description: 'Main dashboard' },
+    'pm schemes': { path: '/pm-kisan', description: 'Government schemes' },
+    'crop recommendation': { path: '/crop-recommendation', description: 'AI crop suggestions' },
+    'smart mandi': { path: '/smart-mandi', description: 'Market prices' },
+    'calendar': { path: '/calendar', description: 'Farming calendar' },
 };
 
 async function browseExpert(state: typeof ChatState.State) {
     console.log(`  🌐 Local Navigator for: "${state.query}"`);
     const queryLower = state.query.toLowerCase();
-
-    // Check if user pasted an external URL
     const externalUrl = state.query.match(/https?:\/\/[^\s"'<>]+/)?.[0];
 
     try {
@@ -253,7 +262,6 @@ async function browseExpert(state: typeof ChatState.State) {
             targetUrl = externalUrl;
             isInternal = false;
         } else {
-            // ── FULLY OFFLINE: Keyword match against sitemap ──
             let bestMatch = '';
             let bestScore = 0;
             for (const [keyword, page] of Object.entries(APP_SITEMAP)) {
@@ -265,85 +273,77 @@ async function browseExpert(state: typeof ChatState.State) {
                 }
             }
             if (bestMatch && bestScore > 0) {
-                targetUrl = APP_BASE + APP_SITEMAP[bestMatch].path;
+                targetUrl = APP_SITEMAP[bestMatch]?.path || '';
                 matchedSection = bestMatch;
             } else {
-                targetUrl = APP_BASE;
+                targetUrl = '/';
                 matchedSection = 'home';
             }
-            console.log(`  → Matched: "${matchedSection}" → ${targetUrl}`);
         }
 
-        // ── OFFLINE: Use Playwright to read the page (no internet needed for localhost) ──
-        const openResult = await browser.openPage(targetUrl);
-        if (openResult.status === 'error') {
-            await browser.closeBrowser();
-            return { response: `❌ Couldn't open ${targetUrl}. Make sure the app is running with \`npm run dev\`.\nError: ${openResult.error}` };
-        }
+        // OpenClaw LLM Action Generation
+        const prompt = `You are the OpenClaw UI Automation Agent for CropWise.
+The user's command is: "${state.query}"
 
-        const pageData = await browser.extractPageContent();
-        await browser.closeBrowser();
+Your goal is to generate a sequence of UI actions to execute this command.
+The best matching internal route is: "${targetUrl}"
 
-        if ('error' in pageData) {
-            return { response: `❌ Opened the page but couldn't read it: ${pageData.error}` };
-        }
+Available OpenClaw Actions:
+{"type": "NAVIGATE", "target": "/path"}
+{"type": "SCROLL", "target": "bottom" | "top" | "css-selector"}
+{"type": "HIGHLIGHT", "target": "css-selector"}
+{"type": "CLICK", "target": "css-selector"}
+{"type": "TYPE", "target": "css-selector", "text": "string"}
+{"type": "WAIT", "duration": milliseconds}
 
-        const pd = pageData as any;
+Selector Registry:
+- Crop Recommendation Page (/crop-recommendation):
+  - Input: "#crop-recommendation-input"
+  - Submit: '#crop-recommendation-submit'
+  - Page Title: "h1"
 
-        // ── OFFLINE: Format the response without any LLM ──
-        const headings = (pd.headings || []).map((h: any) => `  • ${h.text}`).join('\n');
-        const navLinks = (pd.links || []).slice(0, 8).map((l: any) => `  • [${l.text}](${l.href})`).join('\n');
-        const buttons = (pd.buttons || []).filter((b: any) => b.text).map((b: any) => `  • ${b.text}`).join('\n');
-        const formCount = (pd.forms || []).length;
-        const readableSnippet = (pd.readable_text || '').slice(0, 1500);
+Return a valid JSON array of actions.
+MUST RETURN ONLY VALID JSON ARRAY, NO TEXT OR MARKDOWN.
+Do NOT use single quotes for JSON keys or values.
 
-        let response = `🌐 **I navigated to ${isInternal ? 'CropWise' : ''} "${pd.title || targetUrl}"**\n\n`;
-        response += `**URL:** ${pd.url || targetUrl}\n\n`;
+Example for "search for Tomato in crop recommendation":
+[
+  {"type": "NAVIGATE", "target": "/crop-recommendation"},
+  {"type": "WAIT", "duration": 1500},
+  {"type": "TYPE", "target": "#crop-recommendation-input", "text": "Tomato information"},
+  {"type": "CLICK", "target": "#crop-recommendation-submit"},
+  {"type": "WAIT", "duration": 2000},
+  {"type": "HIGHLIGHT", "target": "h1"}
+]`;
 
-        if (headings) response += `**Sections found:**\n${headings}\n\n`;
-        if (readableSnippet) response += `**Page Content:**\n${readableSnippet}\n\n`;
-        if (navLinks) response += `**Links available:**\n${navLinks}\n\n`;
-        if (buttons) response += `**Actions available:**\n${buttons}\n\n`;
-        if (formCount > 0) response += `**Forms:** ${formCount} form(s) detected on this page.\n\n`;
-
-        // Optionally enhance with LLM if available (non-blocking)
+        const res = await llm.invoke(prompt);
+        const content = typeof res.content === 'string' ? res.content : '[]';
+        
+        let actions = [];
         try {
-            const summary = await llm.invoke(
-                `Briefly summarize this CropWise page in 2-3 sentences for a farmer. Page title: "${pd.title}", headings: ${headings}. Content snippet: ${readableSnippet.slice(0, 500)}`
-            );
-            const summaryText = typeof summary.content === 'string' ? summary.content : '';
-            if (summaryText) response += `**AI Summary:** ${summaryText}\n`;
+            const match = content.match(/\[[\s\S]*\]/);
+            if (match) {
+                actions = JSON.parse(match[0]);
+            } else {
+                // Fallback action
+                actions = [{ type: "NAVIGATE", target: targetUrl }];
+            }
         } catch {
-            // LLM unavailable — that's fine, we already have the content
-            response += `_(AI summary unavailable — showing raw page content above)_`;
+            actions = [{ type: "NAVIGATE", target: targetUrl }];
         }
 
-        // Save to DB (best-effort)
-        try {
-            await PageData.create({
-                taskId: '000000000000000000000000',
-                url: targetUrl,
-                title: pd.title || '',
-                headings: pd.headings || [],
-                linksCount: (pd.links || []).length,
-                formsCount: formCount,
-                analysis: response.slice(0, 1000),
-            });
-        } catch { /* best-effort */ }
+        const responseMsg = isInternal 
+            ? `Autonomously navigating you to ${matchedSection || 'the page'}...` 
+            : `I cannot autonomously navigate external sites. Opening ${targetUrl} for you.`;
 
-        // The exact redirect path for the frontend router
-        const redirectUrl = isInternal ? (APP_SITEMAP[matchedSection]?.path || '/') : targetUrl;
-
-        return { response, redirect: redirectUrl };
+        return { response: responseMsg, openClawActions: isInternal ? actions : undefined, redirect: isInternal ? null : targetUrl };
 
     } catch (err: any) {
-        console.error('Browse error:', err.message);
-        await browser.closeBrowser();
-        return { response: `❌ Navigation error: ${err.message}. Make sure the app is running.` };
+        console.error('OpenClaw error:', err.message);
+        return { response: `❌ Navigation error: ${err.message}` };
     }
 }
 
-// --- Routing ---
 function routeDirection(state: typeof ChatState.State): string {
     if (state.category === 'vision') return 'vision_expert';
     if (state.category === 'browse') return 'browse_expert';
@@ -351,10 +351,21 @@ function routeDirection(state: typeof ChatState.State): string {
     if (state.category === 'market') return 'mandi_expert';
     if (state.category === 'profile') return 'profile_expert';
     if (state.category === 'planner') return 'planner_expert';
+    if (state.category === 'doctor') return 'doctor_expert';
+    if (state.category === 'recommend') return 'recommend_expert';
     return 'general_expert';
 }
 
-// --- Build Graph ---
+async function doctorExpert(state: typeof ChatState.State) {
+    const response = await doctorChain.invoke({ query: state.query });
+    return { response };
+}
+
+async function recommendExpert(state: typeof ChatState.State) {
+    const response = await recommendationChain.invoke({ query: state.query });
+    return { response };
+}
+
 const workflow = new StateGraph(ChatState)
     .addNode('router', routerNode)
     .addNode('fetcher', fetchDataNode)
@@ -366,6 +377,8 @@ const workflow = new StateGraph(ChatState)
     .addNode('vision_expert', visionExpert)
     .addNode('planner_expert', plannerExpert)
     .addNode('weather_expert', weatherExpert)
+    .addNode('doctor_expert', doctorExpert)
+    .addNode('recommend_expert', recommendExpert)
     .addNode('geospatial', geospatialNode)
     .addNode('dialect_guardrail', dialectNode)
     .addEdge('__start__', 'router')
@@ -378,6 +391,8 @@ const workflow = new StateGraph(ChatState)
     .addEdge('vision_expert', 'geospatial')
     .addEdge('planner_expert', 'weather_expert')
     .addEdge('weather_expert', 'geospatial')
+    .addEdge('doctor_expert', 'geospatial')
+    .addEdge('recommend_expert', 'geospatial')
     .addEdge('browse_expert', '__end__') 
     .addEdge('geospatial', 'dialect_guardrail')
     .addEdge('dialect_guardrail', '__end__');

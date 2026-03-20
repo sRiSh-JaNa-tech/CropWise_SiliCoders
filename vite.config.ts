@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      port: 5281,
+      port: port,
       proxy: {
         '/api': {
           target: `http://127.0.0.1:${backendPort}`,
