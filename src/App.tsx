@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PMSchemes from './pages/PMSchemes';
 import Account from './pages/Account';
+import WeatherCenter from './pages/WeatherCenter';
 import { SmartPlannerDashboard } from './features/smart-planner/pages/SmartPlannerDashboard';
 import { LanguageProvider as UpstreamLanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -61,6 +62,7 @@ function App() {
                         {/* Upstream Smart Planner routes */}
                         <Route path="/calendar" element={<SmartPlannerDashboard />} />
                         <Route path="/smart-planner" element={<SmartPlannerDashboard />} />
+                        <Route path="/weather-command" element={<WeatherCenter />} />
                       </Routes>
                     </main>
                   </div>

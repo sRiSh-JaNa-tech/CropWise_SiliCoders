@@ -13,6 +13,7 @@ interface Message {
   text: string;
   sender: 'user' | 'ai';
   category?: string;
+  audioBase64?: string;
 }
 
 const AiChat: React.FC = () => {
@@ -54,9 +55,19 @@ const AiChat: React.FC = () => {
     if (isOpen) scrollToBottom();
   }, [messages, isOpen]);
 
-  const speak = (text: string) => {
+  const speak = (text: string, audioBase64?: string) => {
     window.speechSynthesis.cancel();
     
+    if (audioBase64) {
+      try {
+        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+        audio.play().catch(e => console.error('Audio playback failed:', e));
+        return;
+      } catch (err) {
+        console.error('Failed to instantiate Audio object, falling back to Web Speech API');
+      }
+    }
+
     // Convert diverse markdown redirect formatting into clean text for native audio
     const cleanText = text
       .replace(/[*_~`>#]/g, '') // Remove formatting symbols like *, _, ~, >, #
@@ -70,86 +81,68 @@ const AiChat: React.FC = () => {
     window.speechSynthesis.speak(utterance);
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+  const recognitionRef = useRef<any>(null);
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        await sendAudioMessage(audioBlob);
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch (err) {
-      console.error("Mic error:", err);
-      alert("Please allow microphone access to use voice chat.");
+  const startRecording = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
     }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = dialect === 'Khariboli' || dialect === 'Braj' ? 'hi-IN' : 'en-IN';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      setInput('');
+    };
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      // Auto-submit if transcript is not empty
+      setTimeout(() => {
+        setInput(prev => {
+          if (prev.trim()) {
+            // Trigger form submit via simulated event
+            const form = document.getElementById('ai-chat-form') as HTMLFormElement | null;
+            if (form) form.requestSubmit();
+          }
+          return prev;
+        });
+      }, 300);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please allow mic permissions in your browser settings.');
+      }
+    };
+
+    recognition.start();
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
     }
+    setIsRecording(false);
   };
 
-  const sendAudioMessage = async (blob: Blob) => {
-    setIsLoading(true);
-    const formData = new FormData();
-    formData.append('audio', blob, 'recording.wav');
-    if (user?.aadhaarCard) formData.append('aadhaar', user.aadhaarCard);
-    formData.append('connectivity', connectivity);
-    formData.append('dialect', dialect);
-    formData.append('location', locationContext);
-
-    try {
-      const response = await fetch('/api/ai/audio-chat', {
-        method: 'POST',
-        body: formData
-      });
-      if (!response.ok) throw new Error('AI Service Offline');
-      
-      const data = await response.json();
-
-      if (data.redirect) {
-        if (data.redirect.startsWith('/')) {
-          navigate(data.redirect);
-        } else if (data.redirect.startsWith('http')) {
-          window.open(data.redirect, '_blank');
-        }
-      }
-
-      if (data.openClawActions && Array.isArray(data.openClawActions)) {
-        setTimeout(() => executeActions(data.openClawActions), 500);
-      }
-
-      setMessages(prev => [
-        ...prev, 
-        { id: Date.now(), text: data.user_text, sender: 'user' },
-        { id: Date.now() + 1, text: data.response, sender: 'ai', category: data.category }
-      ]);
-
-      speak(data.response);
-    } catch (err) {
-      console.error(err);
-      setMessages(prev => [...prev, { 
-        id: Date.now() + 1, 
-        text: "Voice processing failed. Please ensure the AI server is running.", 
-        sender: 'ai' 
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +163,8 @@ const AiChat: React.FC = () => {
           connectivity,
           dialect,
           location: { lat: 28.6692, lon: 77.4538 },
-          image_data: selectedImage
+          image_data: selectedImage,
+          source: 'global'
         }),
       });
       setSelectedImage(null);
@@ -198,7 +192,7 @@ const AiChat: React.FC = () => {
         category: data.category
       };
       setMessages(prev => [...prev, aiMessage]);
-      speak(data.response);
+      speak(data.response, data.audio_base64);
     } catch (err: any) {
       let errorMsg = "I'm having trouble connecting right now. Please ensure the AI server is running.";
       if (err?.message?.includes('429') || err?.message?.includes('rate limit')) {
@@ -297,7 +291,7 @@ const AiChat: React.FC = () => {
                     </div>
                     {msg.sender === 'ai' && (
                       <button 
-                        onClick={() => speak(msg.text)}
+                        onClick={() => speak(msg.text, (msg as any).audioBase64)}
                         title="Replay Audio"
                         className="absolute -right-10 top-2 opacity-0 group-hover:opacity-100 p-2 text-primary hover:text-white transition-all bg-white/5 rounded-full"
                       >
@@ -330,7 +324,7 @@ const AiChat: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-black/20 flex flex-col gap-2">
+          <form id="ai-chat-form" onSubmit={handleSend} className="p-4 border-t border-white/10 bg-black/20 flex flex-col gap-2">
             {selectedImage && (
               <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
                 <img src={selectedImage} alt="Upload preview" className="w-full h-full object-cover" />

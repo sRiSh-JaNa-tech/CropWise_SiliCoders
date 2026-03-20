@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Landmark, ScanSearch, TrendingUp, CalendarDays } from 'lucide-react';
+import { Landmark, Sprout, TrendingUp, CalendarDays } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from './LanguageContext';
 
@@ -23,7 +23,7 @@ export default function TanyaFeatures() {
       color: '#1FAF5A',
     },
     {
-      icon: ScanSearch,
+      icon: Sprout,
       titleKey: 'cropDoctorTitle',
       descKey: 'cropDoctorDesc',
       color: '#F4C430',
@@ -80,6 +80,7 @@ export default function TanyaFeatures() {
               key={feature.titleKey}
               onClick={() => {
                 if (feature.titleKey === 'pmKisanTitle') navigate('/pm-kisan');
+                else if (feature.titleKey === 'cropDoctorTitle') navigate('/crop-recommendation');
                 else if (feature.titleKey === 'farmingPlannerTitle') navigate('/smart-planner');
               }}
               className={`group relative bg-[#122F27] rounded-2xl p-6 border border-[#1FAF5A]/10

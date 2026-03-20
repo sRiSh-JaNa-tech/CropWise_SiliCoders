@@ -14,6 +14,7 @@ import {
   Trash2,
   Wifi,
   Zap,
+  Volume2,
 } from 'lucide-react';
 import { useConnectivity } from '../context/ConnectivityContext';
 import { modelService } from '../services/ai/ModelService';
@@ -26,6 +27,7 @@ type ChatMessage = {
   model?: string;
   generatedAt?: string;
   isActionable?: boolean;
+  audioBase64?: string;
 };
 
 type PreparedAttachment = {
@@ -73,7 +75,7 @@ const readAsText = (file: File): Promise<string> =>
 
 const formatSize = (size: number) => `${(size / 1024).toFixed(1)} KB`;
 
-const renderMessageAsCards = (text: string) => {
+const renderMessageAsCards = (text: string, playSpecificText?: (txt: string) => void) => {
   if (!text.includes('## ')) {
     return (
       <div className="prose prose-invert max-w-none text-sm leading-7 text-gray-100 prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-headings:text-green-500 prose-strong:text-green-400">
@@ -101,7 +103,16 @@ const renderMessageAsCards = (text: string) => {
                  <div className="w-8 h-8 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center font-bold text-sm border border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                    {index}
                  </div>
-                 <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 tracking-wide">{title}</h2>
+                 <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 tracking-wide flex-1">{title}</h2>
+                 {playSpecificText && (
+                   <button 
+                     onClick={() => playSpecificText(content)}
+                     title="Listen to this section"
+                     className="p-1.5 bg-green-500/10 hover:bg-green-500/30 text-green-400 rounded-full transition-all border border-green-500/20"
+                   >
+                     <Volume2 className="w-4 h-4" />
+                   </button>
+                 )}
                </div>
                <div className="prose prose-invert max-w-none text-sm text-gray-300 relative z-10 prose-p:leading-relaxed prose-li:marker:text-green-500 prose-strong:text-green-400 prose-headings:text-green-300">
                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
@@ -137,6 +148,36 @@ const CropRecommendationPage: React.FC = () => {
   const [offlineResult, setOfflineResult] = useState<{ crop: string, disease: string, agCode: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const speak = (audioBase64?: string) => {
+    if (audioBase64) {
+      try {
+        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+        audio.play().catch(e => console.error('Audio playback failed:', e));
+      } catch (err) {
+        console.error('Failed to instantiate Audio object');
+      }
+    }
+  };
+
+  const playSpecificText = async (text: string) => {
+    try {
+      const res = await fetch('/api/ai/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, dialect: 'English' }) 
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.audio_base64) {
+          const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
+          audio.play().catch(e => console.error('Audio playback failed', e));
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch card audio");
+    }
+  };
 
   const handleFilePick = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files || []) as File[];
@@ -358,6 +399,7 @@ const CropRecommendationPage: React.FC = () => {
           query: fullQuery,
           image_data: firstImage?.dataBase64 ? `data:${firstImage.mimeType};base64,${firstImage.dataBase64}` : null,
           category: 'recommend',
+          source: 'native'
         }),
       });
 
@@ -374,6 +416,7 @@ const CropRecommendationPage: React.FC = () => {
           model: data.category || 'Vision-Expert',
           generatedAt: new Date().toISOString(),
           isActionable: true,
+          audioBase64: data.audio_base64,
         },
       ]);
       setPendingFiles([]);
@@ -432,7 +475,7 @@ const CropRecommendationPage: React.FC = () => {
                     : 'mr-auto max-w-[90%] border-white/10 bg-white/5'
                 }`}
               >
-                {renderMessageAsCards(message.text)}
+                {renderMessageAsCards(message.text, playSpecificText)}
 
                 {message.sender === 'ai' && message.isActionable && message.id === lastActionableAiId && !loading && (
                   <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
@@ -452,6 +495,16 @@ const CropRecommendationPage: React.FC = () => {
                       <Download className="h-3.5 w-3.5" />
                       Download
                     </button>
+                    {message.audioBase64 && (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-300 hover:bg-green-500/20"
+                        onClick={() => speak(message.audioBase64)}
+                      >
+                        <Volume2 className="h-3.5 w-3.5" />
+                        Listen
+                      </button>
+                    )}
                     {message.model && (
                       <span className="rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-primary">
                         {message.model}
@@ -490,6 +543,14 @@ const CropRecommendationPage: React.FC = () => {
                 id="crop-recommendation-input"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    if (!loading && (input.trim() || pendingFiles.length > 0)) {
+                      sendMessage(event as unknown as React.FormEvent);
+                    }
+                  }
+                }}
                 rows={2}
                 placeholder="Example: Analyze this crop leaf image and suggest treatment with next irrigation plan."
                 className="min-h-[44px] flex-1 resize-none bg-transparent px-2 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none"

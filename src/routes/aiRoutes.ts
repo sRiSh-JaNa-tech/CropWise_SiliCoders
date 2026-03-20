@@ -57,13 +57,15 @@ router.post('/chat', async (req: Request, res: Response) => {
             dialect: dialect || 'English',
             planner_input: planner_input || null,
             planner_output: null,
+            source: req.body.source || 'native',
         }));
 
+        // Text completion response
         res.json({ 
             response: result.response, 
             category: result.category, 
             redirect: result.redirect,
-            openClawActions: result.openClawActions 
+            openClawActions: result.openClawActions
         });
     } catch (err: any) {
         console.error('Chat error:', err.message);
@@ -81,14 +83,25 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
         
         const { aadhaar, connectivity, location, dialect, planner_input } = req.body;
 
-        // 1. Transcribe using OpenAI Whisper
-        const file = new File([new Uint8Array(req.file.buffer)], 'audio.wav', { type: 'audio/wav' });
-        const transcription = await openai.audio.transcriptions.create({
-            model: 'whisper-1',
-            file,
+        // 1. Transcribe & Translate using Sarvam API (Replaces Whisper)
+        const formData = new FormData();
+        const blob = new Blob([new Uint8Array(req.file.buffer)], { type: req.file.mimetype || 'audio/wav' });
+        formData.append('file', blob, 'audio.wav');
+        formData.append('prompt', 'agriculture farming crops');
+
+        const sttResponse = await fetch('https://api.sarvam.ai/speech-to-text-translate', {
+            method: 'POST',
+            headers: {
+                'api-subscription-key': 'sk_jal1hpau_gShMVlASorBqNrZFxFG8qNHU'
+            },
+            body: formData
         });
-        const userText = transcription.text.trim();
-        console.log('Transcribed:', userText);
+        
+        const sttData = await sttResponse.json();
+        if (!sttResponse.ok) throw new Error(sttData.error?.message || 'Sarvam STT failed');
+        
+        const userText = sttData.transcript.trim();
+        console.log('Transcribed (Sarvam):', userText);
 
         // 2. Process with chat graph
         const result = await withRetry(() => chatGraph.invoke({
@@ -105,6 +118,7 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
             dialect: dialect || 'English',
             planner_input: planner_input ? JSON.parse(planner_input) : null,
             planner_output: null,
+            source: req.body.source || 'native',
         }));
 
         res.json({ 
@@ -112,10 +126,54 @@ router.post('/audio-chat', upload.single('audio'), async (req: Request, res: Res
             response: result.response, 
             category: result.category, 
             redirect: result.redirect,
-            openClawActions: result.openClawActions 
+            openClawActions: result.openClawActions
         });
     } catch (err: any) {
         console.error('Audio-chat error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── POST /api/ai/tts — On-Demand Sarvam TTS ─────────────────────────────────
+router.post('/tts', async (req: Request, res: Response) => {
+    try {
+        const { text, dialect } = req.body;
+        if (!text) return res.status(400).json({ error: 'Text required' });
+
+        const targetLang = (dialect === 'Khariboli' || dialect === 'Braj') ? 'hi-IN' : 'en-IN';
+        const cleanText = text
+            .replace(/[*_~`>#]/g, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/\n\s*-\s+/g, '. ')
+            .replace(/\n+/g, ' ')
+            .slice(0, 500); // 500 char limit
+
+        const ttsResponse = await fetch('https://api.sarvam.ai/text-to-speech', {
+            method: 'POST',
+            headers: {
+                'api-subscription-key': 'sk_jal1hpau_gShMVlASorBqNrZFxFG8qNHU',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                inputs: [cleanText],
+                target_language_code: targetLang,
+                speaker: 'anushka',
+                pitch: 0,
+                pace: 1.0,
+                loudness: 1.5,
+                speech_sample_rate: 8000,
+                enable_preprocessing: true,
+                model: 'bulbul:v3'
+            })
+        });
+
+        if (ttsResponse.ok) {
+            const ttsData = await ttsResponse.json();
+            res.json({ audio_base64: ttsData.audios?.[0] || null });
+        } else {
+            res.status(500).json({ error: 'Sarvam API Error' });
+        }
+    } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
 });

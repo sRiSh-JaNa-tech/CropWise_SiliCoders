@@ -91,10 +91,28 @@ export const OpenClawProvider: React.FC<{ children: ReactNode }> = ({ children }
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           await delay(500);
           
+          const isTextArea = el.tagName.toLowerCase() === 'textarea';
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+              isTextArea ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype,
+              "value"
+          )?.set;
+
           // Simulate typing
-          el.value = '';
+          if (nativeInputValueSetter) {
+              nativeInputValueSetter.call(el, '');
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+              el.value = '';
+          }
+
+          let currentValue = '';
           for (let i = 0; i < text.length; i++) {
-              el.value += text[i];
+              currentValue += text[i];
+              if (nativeInputValueSetter) {
+                  nativeInputValueSetter.call(el, currentValue);
+              } else {
+                  el.value = currentValue;
+              }
               el.dispatchEvent(new Event('input', { bubbles: true }));
               await delay(50);
           }
