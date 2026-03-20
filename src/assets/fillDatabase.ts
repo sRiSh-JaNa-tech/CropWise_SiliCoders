@@ -21,38 +21,6 @@ const schemesData = [
     officialWebsite: "https://pmkisan.gov.in/"
   },
   {
-    schemeName: "Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)",
-    description: "The world's largest health insurance scheme fully financed by the government, providing a health cover for secondary and tertiary care hospitalization.",
-    benefitsDescription: "Health cover of ₹5 lakhs per family per year for medical treatment in empaneled public and private hospitals.",
-    eligibilityCriteria: "Vulnerable families identified based on the deprivation and occupational criteria of the Socio-Economic Caste Census (SECC) 2011.",
-    requiredDocuments: ["aadhaarCard", "rationCard"],
-    officialWebsite: "https://pmjay.gov.in/"
-  },
-  {
-    schemeName: "Pradhan Mantri Awas Yojana - Gramin (PMAY-G)",
-    description: "A flagship housing scheme aimed at providing a pucca house with basic amenities to all houseless households living in kutcha and dilapidated houses in rural areas.",
-    benefitsDescription: "Financial assistance of ₹1.20 lakh in plains and ₹1.30 lakh in hilly states for house construction.",
-    eligibilityCriteria: "Households without shelter, destitute, living on alms, manual scavengers, and primitive tribal groups.",
-    requiredDocuments: ["aadhaarCard", "bankPassbook", "voterId"],
-    officialWebsite: "https://pmayg.nic.in/"
-  },
-  {
-    schemeName: "Pradhan Mantri Ujjwala Yojana (PMUY)",
-    description: "A scheme aiming to safeguard the health of women and children by providing them with a clean cooking fuel (LPG).",
-    benefitsDescription: "Deposit-free LPG connection along with financial assistance of ₹1,600 per connection.",
-    eligibilityCriteria: "Adult women belonging to BPL households, SC/ST households, PMAY beneficiaries, or Antyodaya Anna Yojana (AAY) beneficiaries.",
-    requiredDocuments: ["aadhaarCard", "rationCard", "bankPassbook"],
-    officialWebsite: "https://www.pmuy.gov.in/"
-  },
-  {
-    schemeName: "Pradhan Mantri Jan Dhan Yojana (PMJDY)",
-    description: "A National Mission for Financial Inclusion to ensure access to financial services, namely, banking, savings, remittance, credit, insurance, and pension.",
-    benefitsDescription: "No minimum balance required, free RuPay debit card, and an inbuilt accident insurance cover of ₹2 lakh.",
-    eligibilityCriteria: "Any Indian citizen aged 10 years and above who does not have an existing bank account.",
-    requiredDocuments: ["aadhaarCard", "panCard"],
-    officialWebsite: "https://pmjdy.gov.in/"
-  },
-  {
     schemeName: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
     description: "A crop insurance scheme that integrates multiple stakeholders on a single platform to protect farmers against crop failure due to natural calamities.",
     benefitsDescription: "Comprehensive insurance cover against failure of the crop, helping stabilize the income of farmers.",
@@ -61,52 +29,52 @@ const schemesData = [
     officialWebsite: "https://pmfby.gov.in/"
   },
   {
-    schemeName: "Pradhan Mantri Shram Yogi Maandhan (PM-SYM)",
-    description: "A voluntary and contributory pension scheme meant for old age protection and social security of Unorganized Workers.",
-    benefitsDescription: "Assured monthly pension of ₹3,000 after attaining the age of 60 years.",
-    eligibilityCriteria: "Unorganized workers aged between 18 to 40 years with a monthly income of ₹15,000 or less.",
+    schemeName: "Pradhan Mantri Krishi Sinchayee Yojana (PMKSY)",
+    description: "A national mission to improve farm productivity and ensure better utilization of the resources in the country.",
+    benefitsDescription: "Subsidies for micro-irrigation systems (drip and sprinkler) and guaranteed water access for farms ('Har Khet Ko Pani').",
+    eligibilityCriteria: "All farmers, including small and marginal farmers, with agricultural land.",
+    requiredDocuments: ["aadhaarCard", "landRecords", "bankPassbook"],
+    officialWebsite: "https://pmksy.gov.in/"
+  },
+  {
+    schemeName: "Pradhan Mantri Kisan Urja Suraksha evam Utthaan Mahabhiyan (PM-KUSUM)",
+    description: "A scheme aiming to add solar and other renewable capacity to agriculture, ensuring energy security for farmers.",
+    benefitsDescription: "Subsidies of up to 60% for installing standalone solar agriculture pumps and grid-connected solar power plants.",
+    eligibilityCriteria: "Individual farmers, groups of farmers, cooperatives, panchayats, and Farmer Producer Organisations (FPOs).",
+    requiredDocuments: ["aadhaarCard", "landRecords", "bankPassbook"],
+    officialWebsite: "https://pmkusum.mnre.gov.in/"
+  },
+  {
+    schemeName: "Paramparagat Krishi Vikas Yojana (PKVY)",
+    description: "An initiative to promote organic farming in India and improve soil health.",
+    benefitsDescription: "Financial assistance of ₹50,000 per hectare for 3 years, out of which ₹31,000 is given directly through DBT for inputs like bio-fertilizers.",
+    eligibilityCriteria: "Farmers who are willing to form clusters of 50 acres or more for organic farming.",
+    requiredDocuments: ["aadhaarCard", "landRecords", "bankPassbook"],
+    officialWebsite: "https://pgsindia-ncof.gov.in/"
+  },
+  {
+    schemeName: "National Agriculture Market (e-NAM)",
+    description: "A pan-India electronic trading portal which networks the existing APMC mandis to create a unified national market for agricultural commodities.",
+    benefitsDescription: "Better price discovery, transparent auction process, and access to a massive national buyer market.",
+    eligibilityCriteria: "Any farmer with marketable surplus output can register.",
     requiredDocuments: ["aadhaarCard", "bankPassbook"],
-    officialWebsite: "https://maandhan.in/"
+    officialWebsite: "https://enam.gov.in/"
   },
   {
-    schemeName: "Pradhan Mantri Mudra Yojana (PMMY)",
-    description: "A scheme to provide loans up to ₹10 lakh to the non-corporate, non-farm small/micro enterprises.",
-    benefitsDescription: "Collateral-free loans categorized into Shishu (up to ₹50K), Kishore (₹50K-₹5L), and Tarun (₹5L-₹10L) for income-generating activities.",
-    eligibilityCriteria: "Any Indian citizen who has a business plan for a non-farm sector income-generating activity.",
-    requiredDocuments: ["aadhaarCard", "panCard", "bankPassbook"],
-    officialWebsite: "https://www.mudra.org.in/"
-  },
-  {
-    schemeName: "Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)",
-    description: "A one-year life insurance scheme renewable from year to year offering coverage for death due to any reason.",
-    benefitsDescription: "Life cover of ₹2 lakh payable to the nominee in case of the subscriber's death for a premium of ₹436 per annum.",
-    eligibilityCriteria: "People in the age group of 18 to 50 years having a bank account who give their consent to join / enable auto-debit.",
+    schemeName: "Pradhan Mantri Kisan Maan-Dhan Yojana (PM-KMY)",
+    description: "A voluntary and contributory pension scheme for the small and marginal farmers in India.",
+    benefitsDescription: "A fixed minimum pension of ₹3,000 per month after reaching the age of 60.",
+    eligibilityCriteria: "Small and marginal farmers owning up to 2 hectares of cultivable land, aged between 18 and 40.",
     requiredDocuments: ["aadhaarCard", "bankPassbook"],
-    officialWebsite: "https://jansuraksha.gov.in/"
+    officialWebsite: "https://pmkmy.gov.in/"
   },
   {
-    schemeName: "Pradhan Mantri Suraksha Bima Yojana (PMSBY)",
-    description: "An accident insurance scheme offering accidental death and disability cover for death or disability on account of an accident.",
-    benefitsDescription: "Accidental death/full disability cover of ₹2 lakh and partial disability cover of ₹1 lakh for a premium of ₹20 per annum.",
-    eligibilityCriteria: "People in the age group 18 to 70 years with a bank account who give their consent to join / enable auto-debit.",
-    requiredDocuments: ["aadhaarCard", "bankPassbook"],
-    officialWebsite: "https://jansuraksha.gov.in/"
-  },
-  {
-    schemeName: "PM SVANidhi (Street Vendor's AtmaNirbhar Nidhi)",
-    description: "A special micro-credit facility to provide affordable loans to street vendors to resume their livelihoods.",
-    benefitsDescription: "Initial working capital loan of up to ₹10,000, with an interest subsidy of 7% per annum on regular repayment.",
-    eligibilityCriteria: "Street vendors engaged in vending in urban areas as of or prior to March 24, 2020.",
-    requiredDocuments: ["aadhaarCard", "voterId", "bankPassbook"],
-    officialWebsite: "https://pmsvanidhi.mohua.gov.in/"
-  },
-  {
-    schemeName: "Pradhan Mantri Garib Kalyan Anna Yojana (PMGKAY)",
-    description: "A food security welfare scheme designed to provide free food grains to the poorest citizens of India.",
-    benefitsDescription: "5 kg of free wheat or rice per person per month, in addition to the regular subsidized quota.",
-    eligibilityCriteria: "Families belonging to the Antyodaya Anna Yojana (AAY) and Priority Households (PHH) under the National Food Security Act.",
-    requiredDocuments: ["aadhaarCard", "rationCard"],
-    officialWebsite: "https://dfpd.gov.in/"
+    schemeName: "Soil Health Card Scheme (SHC)",
+    description: "A national scheme to assist state governments to issue soil health cards to all farmers, advising them on fertilizer use.",
+    benefitsDescription: "Farmers receive a card detailing nutrient status of their soil and recommendations on correct dosage of fertilizers to improve yield.",
+    eligibilityCriteria: "All farmers in India.",
+    requiredDocuments: ["aadhaarCard", "landRecords"],
+    officialWebsite: "https://soilhealth.dac.gov.in/"
   }
 ];
 
@@ -117,8 +85,8 @@ const seedDatabase = async () => {
     console.log('Connected successfully!');
 
     console.log('Clearing existing scheme data...');
-    await PMScheme.deleteMany({}); // Clears the collection so you don't get 'unique' constraint errors on multiple runs
-
+    await PMScheme.deleteMany({}); 
+    
     console.log(`Inserting ${schemesData.length} schemes...`);
     await PMScheme.insertMany(schemesData);
     

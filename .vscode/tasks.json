@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Npm Run Seed",
+			"type": "shell",
+			"command": "npm run seed",
+			"isBackground": false
+		},
+		{
+			"label": "Run Database Seed",
+			"type": "shell",
+			"command": "npx tsx src/assets/fillDatabase.ts",
+			"isBackground": false
+		},
+		{
+			"label": "Start CropWise Project",
+			"type": "shell",
+			"command": "npm run seed && npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Start CropWise Project",
+			"type": "shell",
+			"command": "npm run seed && npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Run Both",
+			"type": "shell",
+			"command": "npm run seed && npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Start CropWise",
+			"type": "shell",
+			"command": "npm run start:all",
+			"isBackground": true
+		}
+	]
+}
