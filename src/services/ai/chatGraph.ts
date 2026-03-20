@@ -1,11 +1,12 @@
 import { StateGraph, END, Annotation } from '@langchain/langgraph';
 import { llm, visionLlm } from './llm.js';
-import { schemeChain, profileChain, marketChain } from './chains.js';
+import { schemeChain, profileChain, marketChain, doctorChain, recommendationChain } from './chains.js';
 import PMScheme from '../../model/PMSchemes.js';
 import User from '../../model/User.js';
 import * as browser from '../agent/browserTools.js';
 import AgentLog from '../../model/AgentLog.js';
 import PageData from '../../model/PageData.js';
+import { fetchSchemes, getMandiData, getDiseaseData, getCropRecommendationData } from './dataLoader.js';
 
 // --- State Definition ---
 const ChatState = Annotation.Root({
@@ -13,15 +14,23 @@ const ChatState = Annotation.Root({
     user_aadhaar: Annotation<string | null>,
     user_data: Annotation<any>,
     scheme_data: Annotation<any>,
+    mandi_data: Annotation<any>,
+    disease_data: Annotation<any>,
+    recommendation_data: Annotation<any>,
     response: Annotation<string>,
     category: Annotation<string>,
     redirect: Annotation<string | null>,
+    openClawActions: Annotation<any[]>,
     
     // Master Agent Telemetry
     connectivity: Annotation<'high' | 'low' | 'zero'>,
     image_data: Annotation<string | null>,
     location: Annotation<{ lat: number; lon: number } | null>,
     dialect: Annotation<string>,
+
+    // Planner Integration
+    planner_input: Annotation<any>,
+    planner_output: Annotation<any>,
 });
 
 // --- Router: detects 'browse' intent with keyword pre-check ---
@@ -52,21 +61,27 @@ async function routerNode(state: typeof ChatState.State) {
 - 'scheme': Questions about government schemes that can be answered from a database.
 - 'market': Questions about Mandi prices or selling crops.
 - 'profile': Questions about registration, documents, or Aadhaar.
+- 'planner': Questions about farming schedules, what to do next, or planning.
+- 'doctor': Questions about crop diseases, pests, health, symptoms, or crop diagnosis.
+- 'recommend': Questions about what crop to grow, seeds to plant, or soil suitability.
 - 'general': Anything else.
 
 Message: "${state.query}"
 Category:`;
     const res = await llm.invoke(prompt);
     const raw = (typeof res.content === 'string' ? res.content : '').trim().toLowerCase();
-    const category = ['scheme', 'market', 'profile'].find(c => raw.includes(c)) || 'general';
+    const category = ['scheme', 'market', 'profile', 'planner', 'doctor', 'recommend'].find(c => raw.includes(c)) || 'general';
     console.log(`  Router: "${state.query}" → ${category} (LLM)`);
     return { category };
 }
 
-// --- Data Fetcher ---
+// --- Data Fetcher (MongoDB-first, JSON fallback) ---
 async function fetchDataNode(state: typeof ChatState.State) {
     let user_data = null;
     let scheme_data = null;
+    let mandi_data = null;
+    let disease_data = null;
+    let recommendation_data = null;
 
     if (state.category === 'profile' && state.user_aadhaar) {
         const user = await User.findOne({ aadhaarCard: state.user_aadhaar }).lean();
@@ -76,15 +91,17 @@ async function fetchDataNode(state: typeof ChatState.State) {
             user_data = u;
         }
     } else if (state.category === 'scheme') {
-        scheme_data = await PMScheme.find({
-            $or: [
-                { schemeName: { $regex: state.query, $options: 'i' } },
-                { description: { $regex: state.query, $options: 'i' } }
-            ]
-        }).limit(3).lean();
+        // Uses MongoDB-first with temp_data.json fallback
+        scheme_data = await fetchSchemes(state.query);
+    } else if (state.category === 'market') {
+        mandi_data = getMandiData(state.query);
+    } else if (state.category === 'doctor') {
+        disease_data = getDiseaseData(state.query);
+    } else if (state.category === 'recommend') {
+        recommendation_data = getCropRecommendationData(state.query);
     }
 
-    return { user_data, scheme_data };
+    return { user_data, scheme_data, mandi_data, disease_data, recommendation_data };
 }
 
 // --- Expert Nodes ---
@@ -97,7 +114,13 @@ async function schemeExpert(state: typeof ChatState.State) {
 }
 
 async function marketExpert(state: typeof ChatState.State) {
-    const response = await marketChain.invoke({ query: state.query });
+    const mandiContext = state.mandi_data && state.mandi_data.length > 0
+        ? JSON.stringify(state.mandi_data)
+        : null;
+    const response = await marketChain.invoke({
+        query: state.query,
+        mandi_data: mandiContext ?? 'Live mandi data unavailable.'
+    });
     return { response };
 }
 
@@ -110,15 +133,170 @@ async function profileExpert(state: typeof ChatState.State) {
 }
 
 async function generalExpert(state: typeof ChatState.State) {
-    const res = await llm.invoke(state.query);
+    const prompt = `You are CropWise AI, a highly knowledgeable agricultural assistant for Indian farmers. You have expertise across agronomy, veterinary science, government schemes, market economics, and rural technology.
+
+Farmer's Question: "${state.query}"
+
+Instructions:
+- Answer directly and practically. Farmers need action, not theory.
+- If the question is agricultural, structure your answer clearly with headings.
+- If the question is about something outside agriculture (greetings, general queries), respond warmly and briefly — then guide back to how CropWise can help the farmer.
+- Use simple Hindi-English friendly language. Avoid jargon.
+- End every response with one actionable suggestion or helpful tip for the farmer.
+
+Respond thoughtfully and helpfully:`;
+    const res = await llm.invoke(prompt);
     return { response: typeof res.content === 'string' ? res.content : '' };
 }
 
-// --- Master Agent Nodes ---
+async function plannerExpert(state: typeof ChatState.State) {
+    console.log(`  📅 Planner Expert generating schedule...`);
+    const input = state.planner_input || {};
+    const crop      = input.cropType   || 'Mixed crops';
+    const soil      = input.soilType   || 'Loamy soil';
+    const size      = input.farmSize   || '1 acre';
+    const sowDate   = input.sowingDate || 'this week';
+    const state_loc = input.state      || 'India';
+    const water     = input.irrigation || 'canal/tube-well';
+
+    const prompt = `You are YOJAK (Yield Optimization & Journey Advisor for Kisan), a master farm planning expert. You create scientifically precise, profit-maximizing seasonal farm plans for Indian farmers.
+
+════ FARM PROFILE ════
+Crop: ${crop}
+Soil Type: ${soil}
+Farm Size: ${size}
+Sowing Date / Start: ${sowDate}
+Location / State: ${state_loc}
+Irrigation Source: ${water}
+═════════════════════
+
+Your task: Generate a COMPLETE, SCIENTIFICALLY DETAILED, PROFIT-FOCUSED farming schedule.
+
+══ PLANNING METHODOLOGY ══
+STEP 1 — SEASON ANALYSIS: What season does the sowing date fall in? What are the climate risks for this crop in this season?
+STEP 2 — CROP LIFECYCLE: Map out the full growth stages: germination → vegetative → flowering → fruiting → maturity → harvest.
+STEP 3 — CRITICAL DATES: Calculate exact dates for each intervention (fertilizer, irrigation, pesticide) based on sowing date.
+STEP 4 — RESOURCE BUDGET: How much fertilizer, water, labour, and money is needed? Per acre breakdown.
+STEP 5 — YIELD PROJECTION: Realistic expected yield range and market value at harvest.
+════════════════════════════
+
+Format your response with these EXACT Markdown headings:
+
+## 1. Seasonal Strategy
+[Season, climate context, 3 key success factors for this crop in this soil]
+
+## 2. Critical Milestones
+[Table with columns: Week/Date | Activity | Quantity/Dose | Purpose]
+
+## 3. Resource Management
+[Breakdown: Seeds (kg/acre), Fertilizers (type + kg + timing), Irrigation (frequency + litres), Labour (person-days), Estimated Cost (₹/acre)]
+
+## 4. 📊 Analytics & Projections
+[Include BOTH of these CHART tags exactly:]
+[CHART: Bar, Expected Yield (kg/month), Month 1: 0, Month 2: 0, Month 3: 200, Month 4: 800, Month 5: 1500]
+[CHART: Area, Expense Breakdown (₹), Seeds: 3000, Fertilizer: 4500, Labour: 5000, Pesticides: 2000, Irrigation: 1500]
+[Profit Projection table: Input Cost vs Expected Revenue vs Net Profit per acre]
+
+## 5. Risk Mitigation
+[Top 3 risks for this crop/season + specific mitigation actions + insurance schemes available]
+
+Be precise with dates. Use ₹ for Indian Rupees. Write as if advising a smart, modern farmer who is running a business.`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : 'Plan generated.' };
+}
+
+async function mandiExpert(state: typeof ChatState.State) {
+    console.log(`  📊 Mandi Expert analyzing prices...`);
+    // Use fetched mandi_data if available, else fall back to embedded static context
+    let mandiContext: string;
+    if (state.mandi_data && state.mandi_data.length > 0) {
+        mandiContext = JSON.stringify(state.mandi_data, null, 2);
+    } else {
+        mandiContext = "Wheat: ₹2,275/quintal, Rice: ₹2,183/quintal, Potato: ₹1,540/quintal. Trend: Market peaking for Wheat.";
+    }
+    const prompt = `Based on these Mandi prices and trends:\n${mandiContext}\n\nAnswer the user's market question: "${state.query}".
+Provide expert advice on when to sell, risks, best crops to sow for profit in the next season.`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : 'Mandi analysis complete.' };
+}
+
+async function weatherExpert(state: typeof ChatState.State) {
+    console.log(`  ☁️ Weather Expert checking conditions...`);
+    const weatherInfo = "Current Temp: 28°C, Humidity: 65%, Forecast: Light rain expected in 2 days.";
+    const prompt = `You are VAYU (Vegetation & Agricultural Yield Updater), a precision agriculture weather specialist.
+
+Current Weather Conditions: ${weatherInfo}
+
+Original Agricultural Advice: ${state.response || 'None provided yet.'}
+
+Farmer's Query Context: "${state.query}"
+
+Your task: Intelligently integrate the weather data into the agricultural advice.
+
+Think through:
+1. Does the upcoming rain affect irrigation scheduling? (cancel next watering session?)
+2. Does humidity (65%) create disease risk? (fungal conditions?)
+3. Does temperature (28°C) affect pesticide application? (avoid spraying in heat)
+4. Should the farmer expedite or delay any planned activities?
+5. Are there specific weather-smart actions to take in the next 48 hours?
+
+If the original advice is 'None', generate fresh weather-integrated agricultural guidance from scratch.
+
+Output the enhanced advice, naturally incorporating weather insights as actionable adjustments. Keep all original advice sections but add a:
+
+## ☁️ Weather Advisory (Next 48 Hours)
+[Specific actions or schedule adjustments based on current conditions]`;
+    
+    const res = await llm.invoke(prompt);
+    return { response: typeof res.content === 'string' ? res.content : state.response };
+}
+
 async function visionExpert(state: typeof ChatState.State) {
     console.log(`  👁️ Vision Expert analyzing image...`);
-    const prompt = `Analyze this crop image for pests, fungal infections, or nutrient deficiencies. Prescribe actionable advice. Do not just "identify"; you must prescribe.
-User Query: ${state.query}`;
+    const prompt = `You are DR. FASAL VISION — an AI crop health specialist trained to diagnose plant diseases, pest infestations, and nutrient deficiencies from photographs. You combine the skills of a plant pathologist, entomologist, and remote sensing specialist.
+
+Critical Instructions:
+1. ANALYZE the image systematically: leaf color, texture, lesion pattern, affected plant parts, spread pattern.
+2. Do NOT say "I cannot diagnose" — always provide your best clinical assessment with a confidence level.
+3. Give BOTH chemical AND organic treatment protocols.
+4. Estimate URGENCY: How fast is this spreading? How many days before significant crop loss?
+5. Use Indian brand names for pesticides/fungicides where possible.
+
+Farmer's Additional Context: "${state.query}"
+
+Respond with EXTREME DETAIL using these exact headings:
+
+## 🚦 Urgency Level
+[🔴 CRITICAL — act within 24-48 hours / 🟡 MODERATE — act within 1 week / 🟢 MILD — monitor]
+[One sentence on estimated time to significant crop loss if untreated]
+
+## 🔬 Visual Diagnosis
+**Primary Diagnosis:** [Disease/pest name] — Confidence: [High/Medium/Low]
+**Secondary Possibility:** [If applicable]
+[What specific visual features in the image led to this diagnosis]
+
+## 👁️ Symptom Pattern Analysis
+[Detailed description of what you observe: color changes, lesion shape, spread pattern, affected plant parts]
+[What this pattern tells us about the pathogen's life stage]
+
+## ⚗️ Chemical Treatment Protocol
+| Product (Brand) | Active Ingredient | Dose per 15L pump | Spray Interval |
+|----------------|-------------------|-------------------|----------------|
+[Fill table with 2-3 specific products. Include safety warnings.]
+
+## 🌿 Organic / Bio Treatment
+[2-3 specific organic solutions with preparation method, concentration, and frequency]
+
+## 🚫 Common Mistakes to Avoid
+[What farmers typically do wrong when treating this problem]
+
+## 🛡️ Spread Control — Do This NOW
+[Immediate steps to stop the problem spreading to healthy plants]
+
+## 🔄 Long-term Prevention
+[Crop rotation, resistant varieties, cultural practices for next season]`;
     
     const res = await visionLlm.invoke([
         {
@@ -222,8 +400,9 @@ async function browseExpert(state: typeof ChatState.State) {
                     bestMatch = keyword;
                 }
             }
-            if (bestMatch && bestScore > 0) {
-                targetUrl = APP_BASE + APP_SITEMAP[bestMatch].path;
+            const page = APP_SITEMAP[bestMatch];
+            if (page && bestScore > 0) {
+                targetUrl = APP_BASE + page!.path;
                 matchedSection = bestMatch;
             } else {
                 targetUrl = APP_BASE;
@@ -301,6 +480,29 @@ async function browseExpert(state: typeof ChatState.State) {
     }
 }
 
+async function doctorExpert(state: typeof ChatState.State) {
+    const diseaseContext = state.disease_data && state.disease_data.length > 0
+        ? JSON.stringify(state.disease_data, null, 2)
+        : 'No specific disease data loaded. Use general plant pathology knowledge.';
+    const response = await doctorChain.invoke({
+        query: state.query,
+        disease_data: diseaseContext
+    });
+    return { response };
+}
+
+async function recommendExpert(state: typeof ChatState.State) {
+    const recommendContext = state.recommendation_data && state.recommendation_data.length > 0
+        ? JSON.stringify(state.recommendation_data, null, 2)
+        : 'No specific recommendation data loaded. Use general Indian agri knowledge.';
+    const response = await recommendationChain.invoke({
+        query: state.query,
+        recommendation_data: recommendContext
+    });
+    return { response };
+}
+
+
 // --- Routing ---
 function routeDirection(state: typeof ChatState.State): string {
     if (state.category === 'vision') return 'vision_expert';
@@ -308,10 +510,11 @@ function routeDirection(state: typeof ChatState.State): string {
     if (state.category === 'scheme') return 'scheme_expert';
     if (state.category === 'market') return 'market_expert';
     if (state.category === 'profile') return 'profile_expert';
+    if (state.category === 'planner') return 'planner_expert';
+    if (state.category === 'doctor') return 'doctor_expert';
+    if (state.category === 'recommend') return 'recommend_expert';
     return 'general_expert';
 }
-
-// --- Build Graph ---
 const workflow = new StateGraph(ChatState)
     .addNode('router', routerNode)
     .addNode('fetcher', fetchDataNode)
@@ -321,6 +524,10 @@ const workflow = new StateGraph(ChatState)
     .addNode('general_expert', generalExpert)
     .addNode('browse_expert', browseExpert)
     .addNode('vision_expert', visionExpert)
+    .addNode('planner_expert', plannerExpert)
+    .addNode('weather_expert', weatherExpert)
+    .addNode('doctor_expert', doctorExpert)
+    .addNode('recommend_expert', recommendExpert)
     .addNode('geospatial', geospatialNode)
     .addNode('dialect_guardrail', dialectNode)
     .addEdge('__start__', 'router')
@@ -331,6 +538,10 @@ const workflow = new StateGraph(ChatState)
     .addEdge('profile_expert', 'geospatial')
     .addEdge('general_expert', 'geospatial')
     .addEdge('vision_expert', 'geospatial')
+    .addEdge('planner_expert', 'weather_expert')
+    .addEdge('weather_expert', 'geospatial')
+    .addEdge('doctor_expert', 'geospatial')
+    .addEdge('recommend_expert', 'geospatial')
     .addEdge('browse_expert', '__end__') // Browse skips geospatial/dialect to preserve UI markdown
     .addEdge('geospatial', 'dialect_guardrail')
     .addEdge('dialect_guardrail', '__end__');

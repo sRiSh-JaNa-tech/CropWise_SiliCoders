@@ -11,7 +11,8 @@
     "start": "npm run dev:server",
     "build": "vite build",
     "preview": "vite preview",
-    "seed": "tsx src/assets/fillDatabase.ts"
+    "seed": "tsx src/assets/fillDatabase.ts",
+    "seed:data": "tsx scripts/fetch_mongodb_data.ts"
   },
   "keywords": [],
   "author": "",
