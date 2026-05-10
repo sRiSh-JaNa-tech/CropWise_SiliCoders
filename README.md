@@ -291,19 +291,3 @@ npm start
 # Team Silicoders
 
 Built with the vision of making AI accessible to every farmer regardless of connectivity, language, or technical literacy.
-
----
-
-# Acknowledgements
-
-Special thanks to:
-- Open-source AI ecosystem
-- Agricultural research communities
-- Rural innovation initiatives
-- Farmers inspiring resilient technology
-
----
-
-# Reference
-
-Project details, workflow, uniqueness, and architecture were derived from the CropWise project presentation. :contentReference[oaicite:0]{index=0}
